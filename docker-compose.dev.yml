@@ -1,0 +1,57 @@
+# docker-compose.dev.yml
+#
+# Local development stack.
+# - `neon-local` runs the Neon Local proxy in front of a real Neon project and
+#   creates an ephemeral branch on container start (PARENT_BRANCH_ID).
+# - `app` runs the Node.js application; it connects to Postgres at
+#   postgres://neon:npg@neon-local:5432/neondb?sslmode=require
+#
+# Usage:
+#   1. Copy .env.development.example to .env.development and fill in values.
+#      NEON_API_KEY and NEON_PROJECT_ID come from https://console.neon.tech
+#   2. docker compose -f docker-compose.dev.yml --env-file .env.development up --build
+#
+# Notes:
+# - Neon Local issues a self-signed certificate; the connection string must use
+#   sslmode=require (the Neon serverless driver accepts self-signed certs by
+#   default in local mode, but classic pg clients may need rejectUnauthorized=false).
+# - The ephemeral branch is destroyed when this stack is stopped (DELETE_BRANCH=true).
+# - Both services use network_mode: host so they share the host network stack.
+#   This sidesteps the Docker bridge → iptables interaction that on this host
+#   (Kubuntu with systemd-resolved) blocks outbound HTTPS from containers,
+#   which in turn prevented Neon Local from reaching console.neon.tech to
+#   create the ephemeral branch. The app talks to Neon Local on localhost:5432.
+
+name: acquisitions-dev
+
+services:
+  neon-local:
+    image: neondatabase/neon_local:latest
+    container_name: acquisitions-neon-local
+    network_mode: host
+    env_file:
+      - .env.development
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U neon -d neondb || exit 0"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: acquisitions-app-dev
+    image: acquisitions:dev
+    network_mode: host
+    depends_on:
+      neon-local:
+        condition: service_started
+    env_file:
+      - .env.development
+    volumes:
+      # Mount source for live reloads during local development
+      - ./src:/app/src:ro
+    restart: unless-stopped

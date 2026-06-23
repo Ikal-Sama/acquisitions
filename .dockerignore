@@ -1,0 +1,20 @@
+# Build-time ignore list for Docker
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+!.env.development
+!.env.production
+.dockerignore
+Dockerfile
+docker-compose*.yml
+*.md
+logs
+coverage
+.nyc_output
+.vscode
+.idea
+.neon_local

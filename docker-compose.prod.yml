@@ -1,0 +1,47 @@
+# docker-compose.prod.yml
+#
+# Production stack.
+# - `app` runs the Node.js application.
+# - No Neon Local proxy is used. The application connects DIRECTLY to Neon's
+#   serverless cloud database via the DATABASE_URL injected from .env.production.
+# - All secrets are injected via environment variables; nothing is hardcoded.
+#
+# Usage:
+#   1. Ensure .env.production is populated with real Neon Cloud credentials.
+#   2. docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+#
+# Cloud deployment tip:
+#   In a managed environment (ECS, Fly.io, Render, Kubernetes, etc.) you usually
+#   only deploy the `app` service. The compose file is provided for parity and
+#   for running the production image locally (smoke tests) against the real DB.
+
+name: acquisitions-prod
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: acquisitions-app-prod
+    image: acquisitions:prod
+    env_file:
+      - .env.production
+    ports:
+      - "3000:3000"
+    # Container-level hardening
+    read_only: false
+    security_opt:
+      - no-new-privileges:true
+    # Drop all capabilities, then add back only what's needed (none required for Node)
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/health', r => process.exit(r.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    # On a cloud host you would typically run behind a reverse proxy and
+    # NOT publish 3000 publicly. Remove the `ports` block for that case.

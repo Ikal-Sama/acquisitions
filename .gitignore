@@ -1,2 +1,9 @@
 node_modules
+.env
 .env.*
+!.env.example
+!.env.development.example
+!.env.production.example
+logs
+.neon_local
+.neon_local/
