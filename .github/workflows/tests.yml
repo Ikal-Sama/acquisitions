@@ -73,7 +73,7 @@ jobs:
               echo "| Metric     | Covered |"
               echo "|------------|---------|"
               for k in lines statements functions branches; do
-                pct=$(node -e "const c=require('./coverage/coverage-summary.json');process.stdout.write(c.total && c.total[k] ? c.total[k].pct+'%' : 'n/a')")
+                pct=$(node -e "const c=require('./coverage/coverage-summary.json');process.stdout.write(c.total && c.total['$k'] ? c.total['$k'].pct+'%' : 'n/a')")
                 echo "| $k | $pct |"
               done
             else
