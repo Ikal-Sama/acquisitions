@@ -147,3 +147,6 @@
 {"level":"info","message":"User jsmastery@gmail.com created successfully","service":"acquisitions-api","timestamp":"2026-06-23T10:45:24.690Z"}
 {"level":"info","message":"User registered successfully: jsmastery@gmail.com","service":"acquisitions-api","timestamp":"2026-06-23T10:45:24.706Z"}
 {"level":"info","message":"::1 - - [23/Jun/2026:10:45:24 +0000] \"POST /api/auth/sign-up HTTP/1.1\" 201 105 \"-\" \"PostmanRuntime/7.49.1\"\n","service":"acquisitions-api","timestamp":"2026-06-23T10:45:24.709Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [24/Jun/2026:01:54:03 +0000] \"GET /health HTTP/1.1\" 200 75 \"-\" \"-\"\n","service":"acquisitions-api","timestamp":"2026-06-24T01:54:03.855Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [24/Jun/2026:01:54:03 +0000] \"GET /api HTTP/1.1\" 200 41 \"-\" \"-\"\n","service":"acquisitions-api","timestamp":"2026-06-24T01:54:03.922Z"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [24/Jun/2026:01:54:03 +0000] \"GET /nonexistent HTTP/1.1\" 404 28 \"-\" \"-\"\n","service":"acquisitions-api","timestamp":"2026-06-24T01:54:03.970Z"}

@@ -5,6 +5,7 @@
   "type": "module",
   "main": "index.js",
   "imports": {
+    "#src/*": "./src/*",
     "#config/*": "./src/config/*",
     "#logger/*": "./src/logger/*",
     "#controllers/*": "./src/controllers/*",
@@ -26,8 +27,9 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:migrate": "drizzle-kit migrate",
-    "dev:docker":"sh ./scripts/dev.sh",
-    "prod:docker":"sh ./scripts/prod.sh"
+    "dev:docker": "sh ./scripts/dev.sh",
+    "prod:docker": "sh ./scripts/prod.sh",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "repository": {
     "type": "git",
@@ -62,6 +64,8 @@
     "eslint": "^10.5.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.6",
-    "prettier": "^3.8.4"
+    "jest": "^30.4.2",
+    "prettier": "^3.8.4",
+    "supertest": "^7.2.2"
   }
 }

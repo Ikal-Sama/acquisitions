@@ -1,0 +1,66 @@
+name: Lint and Format
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-and-format-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-format:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        id: eslint
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Run Prettier check
+        id: prettier
+        continue-on-error: true
+        run: npm run format:check
+
+      - name: Annotate and fail if issues found
+        if: steps.eslint.outcome == 'failure' || steps.prettier.outcome == 'failure'
+        run: |
+          {
+            echo "### ❌ Lint or Format issues found"
+            echo ""
+            if [ "${{ steps.eslint.outcome }}" = "failure" ]; then
+              echo "#### ESLint failures"
+              echo "Run \`npm run lint:fix\` locally to auto-fix what can be auto-fixed."
+              echo ""
+            fi
+            if [ "${{ steps.prettier.outcome }}" = "failure" ]; then
+              echo "#### Prettier formatting issues"
+              echo "Run \`npm run format\` locally to reformat files."
+              echo ""
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "::error::Lint or format check failed. See job logs for details."
+          echo "Run 'npm run lint:fix' to auto-fix lint issues and 'npm run format' to fix formatting."
+
+          # Explicitly fail the step so the workflow run is marked failed.
+          exit 1
