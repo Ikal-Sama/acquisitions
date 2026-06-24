@@ -110,7 +110,7 @@ substantively refactored — match the file's existing style.
 - **Forward errors with `next(e)`** in controllers so the centralized
   error handler can shape them. Catch known business errors (e.g.
   `'User not found'`, `'Invalid credentials'`, `'User with this email
-  already exists'`) and translate to `401`/`409` before falling through.
+already exists'`) and translate to `401`/`409` before falling through.
 - **Add new tables** by creating a `*.model.js` in `src/models/` and
   running `npm run db:generate` (Drizzle Kit picks them up via
   `drizzle.config.js`'s `schema: './src/models/*.js'`). For prod,
@@ -118,7 +118,7 @@ substantively refactored — match the file's existing style.
 - **Write Drizzle queries using the schema object**, not raw SQL. Use
   the typed column refs (`users.email`, `users.id`).
 - **Keep responses consistent.** JSON, camelCase fields, `{ message,
-  data, count? }` shape as already used in `users.controller.js`.
+data, count? }` shape as already used in `users.controller.js`.
 - **Mount new routers in `app.js`** under `/api/<resource>`.
 - **Run `npm run lint` and `npm run format`** before considering work
   done. Match the repo's prettier settings (single quotes, semis,
@@ -195,25 +195,25 @@ substantively refactored — match the file's existing style.
 
 ## 5. Coding conventions (quick reference)
 
-| Concern              | Rule                                                        |
-| -------------------- | ----------------------------------------------------------- |
-| Quotes               | Single quotes (`'`)                                         |
-| Semicolons           | Always                                                      |
-| Indent               | 2 spaces, no tabs                                           |
-| Line endings         | LF (`linebreak-style: unix`)                                |
-| Line width           | 80 chars (Prettier `printWidth`)                            |
-| Arrow parens         | `avoid` (no parens around single param: `x => x.id`)        |
-| Imports              | ESM with `.js` extension; prefer `#alias/*` paths           |
-| Async errors         | `try/catch` + `logger.error(...)` + `next(e)` in controllers |
-| Validation           | `zod.<schema>.safeParse(req.body)`                          |
-| DB driver            | `drizzle-orm/neon-http` via `@neondatabase/serverless`      |
-| Passwords            | `bcrypt` cost 10; never log; never return                  |
-| Auth                 | JWT in HttpOnly cookie (`sameSite: 'strict'`, secure in prod) |
-| Logging              | `winston` (`#config/logger.js`)                            |
-| Lint                 | `npm run lint`                                              |
-| Format               | `npm run format`                                            |
-| HTTP errors          | `{ error, details? }` JSON; status from controller         |
-| New env vars         | Add to `.env.example`, `.env.development.example`, `.env.production.example` |
+| Concern      | Rule                                                                         |
+| ------------ | ---------------------------------------------------------------------------- |
+| Quotes       | Single quotes (`'`)                                                          |
+| Semicolons   | Always                                                                       |
+| Indent       | 2 spaces, no tabs                                                            |
+| Line endings | LF (`linebreak-style: unix`)                                                 |
+| Line width   | 80 chars (Prettier `printWidth`)                                             |
+| Arrow parens | `avoid` (no parens around single param: `x => x.id`)                         |
+| Imports      | ESM with `.js` extension; prefer `#alias/*` paths                            |
+| Async errors | `try/catch` + `logger.error(...)` + `next(e)` in controllers                 |
+| Validation   | `zod.<schema>.safeParse(req.body)`                                           |
+| DB driver    | `drizzle-orm/neon-http` via `@neondatabase/serverless`                       |
+| Passwords    | `bcrypt` cost 10; never log; never return                                    |
+| Auth         | JWT in HttpOnly cookie (`sameSite: 'strict'`, secure in prod)                |
+| Logging      | `winston` (`#config/logger.js`)                                              |
+| Lint         | `npm run lint`                                                               |
+| Format       | `npm run format`                                                             |
+| HTTP errors  | `{ error, details? }` JSON; status from controller                           |
+| New env vars | Add to `.env.example`, `.env.development.example`, `.env.production.example` |
 
 ---
 

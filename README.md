@@ -3,9 +3,9 @@
 This project is a Node.js / Express + Drizzle ORM service that talks to a
 **Postgres** database. It runs in two modes:
 
-| Environment | Database                    | How it runs                                     |
-| ----------- | --------------------------- | ----------------------------------------------- |
-| Development | **Neon Local** (in Docker)  | `docker-compose.dev.yml` + ephemeral branch     |
+| Environment | Database                    | How it runs                                      |
+| ----------- | --------------------------- | ------------------------------------------------ |
+| Development | **Neon Local** (in Docker)  | `docker-compose.dev.yml` + ephemeral branch      |
 | Production  | **Neon Cloud** (serverless) | `docker-compose.prod.yml` against `DATABASE_URL` |
 
 The same image is used in both — only the environment variables change.
@@ -32,7 +32,7 @@ The same image is used in both — only the environment variables change.
 Two files are **not** committed (they are in `.gitignore`):
 
 - `.env.development` — read by `docker-compose.dev.yml`
-- `.env.production`  — read by `docker-compose.prod.yml`
+- `.env.production` — read by `docker-compose.prod.yml`
 
 Two example files are committed — copy them and fill in real values:
 
@@ -180,11 +180,11 @@ docker run --rm \
 
 ## 5. How `DATABASE_URL` is selected
 
-| Stack                       | Source                                                                                  |
-| --------------------------- | --------------------------------------------------------------------------------------- |
-| `docker-compose.dev.yml`    | Hardcoded in the compose file to `postgres://neon:npg@neon-local:5432/neondb?sslmode=require` |
-| `docker-compose.prod.yml`   | `DATABASE_URL` from `.env.production` (Neon Cloud)                                      |
-| Bare `npm run dev` on host  | `DATABASE_URL` from the local `.env` (or the Neon Cloud URL if you skip Docker)         |
+| Stack                      | Source                                                                                        |
+| -------------------------- | --------------------------------------------------------------------------------------------- |
+| `docker-compose.dev.yml`   | Hardcoded in the compose file to `postgres://neon:npg@neon-local:5432/neondb?sslmode=require` |
+| `docker-compose.prod.yml`  | `DATABASE_URL` from `.env.production` (Neon Cloud)                                            |
+| Bare `npm run dev` on host | `DATABASE_URL` from the local `.env` (or the Neon Cloud URL if you skip Docker)               |
 
 Switching between them is purely an environment-variable swap — no
 code changes required.

@@ -32,7 +32,7 @@ services:
     env_file:
       - .env.development
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U neon -d neondb || exit 0"]
+      test: ['CMD-SHELL', 'pg_isready -U neon -d neondb || exit 0']
       interval: 5s
       timeout: 3s
       retries: 20

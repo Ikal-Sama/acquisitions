@@ -28,7 +28,7 @@ services:
     env_file:
       - .env.production
     ports:
-      - "3000:3000"
+      - '3000:3000'
     # Container-level hardening
     read_only: false
     security_opt:
@@ -38,7 +38,13 @@ services:
       - ALL
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/health', r => process.exit(r.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))"]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://127.0.0.1:3000/health', r => process.exit(r.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
