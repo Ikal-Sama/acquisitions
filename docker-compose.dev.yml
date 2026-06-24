@@ -43,6 +43,13 @@ services:
       context: .
       dockerfile: Dockerfile
       target: runtime
+      # Build the image using the host's network so DNS works correctly on
+      # systemd-resolved setups where Docker's embedded DNS proxy is
+      # unreachable from build containers. Without this, `apk add` inside
+      # the builder stage fails with "DNS: transient error" and packages
+      # can't be resolved. service-level network_mode below applies to the
+      # *running* container, not the build, so this must be set here too.
+      network: host
     container_name: acquisitions-app-dev
     image: acquisitions:dev
     network_mode: host
