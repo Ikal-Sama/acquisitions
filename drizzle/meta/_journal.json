@@ -8,6 +8,34 @@
       "when": 1782123575068,
       "tag": "0000_dapper_moondragon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782296105027,
+      "tag": "0001_pale_kulan_gath",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782356077603,
+      "tag": "0002_free_skullbuster",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782357073939,
+      "tag": "0003_sad_luke_cage",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782357840591,
+      "tag": "0004_quick_beyonder",
+      "breakpoints": true
     }
   ]
 }

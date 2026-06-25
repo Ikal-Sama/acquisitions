@@ -5,5 +5,6 @@ node_modules
 !.env.development.example
 !.env.production.example
 logs
+coverage
 .neon_local
 .neon_local/
