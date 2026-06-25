@@ -24,11 +24,18 @@
 
 name: acquisitions-dev
 
+networks:
+  acquisitions-net:
+    driver: bridge
+
 services:
   neon-local:
     image: neondatabase/neon_local:latest
     container_name: acquisitions-neon-local
-    network_mode: host
+    networks:
+      - acquisitions-net
+    ports:
+      - '5432:5432'
     env_file:
       - .env.development
     healthcheck:
@@ -52,7 +59,8 @@ services:
       network: host
     container_name: acquisitions-app-dev
     image: acquisitions:dev
-    network_mode: host
+    networks:
+      - acquisitions-net
     depends_on:
       neon-local:
         condition: service_started

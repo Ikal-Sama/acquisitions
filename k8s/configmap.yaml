@@ -4,6 +4,7 @@ metadata:
   name: acquisitions-config
   namespace: acquisitions
 data:
-  NODE_ENV: 'production'
+  NODE_ENV: 'development'
   PORT: '3000'
   LOG_LEVEL: 'info'
+  ARCJET_ENV: 'development'

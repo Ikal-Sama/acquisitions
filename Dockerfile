@@ -4,12 +4,9 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Install OS deps needed for native modules (e.g. bcrypt)
-RUN apk add --no-cache python3 make g++ openssl
-
-# Install dependencies (with dev deps so drizzle-kit is available for db:generate)
+# Copy pre-installed node_modules from host (avoids npm network issues in Docker)
 COPY package.json package-lock.json* ./
-RUN npm ci
+COPY node_modules ./node_modules
 
 # Copy the rest of the source
 COPY . .
