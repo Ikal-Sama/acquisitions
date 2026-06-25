@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: acquisitions-migration
+  namespace: acquisitions
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: acquisitions:prod
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              npm install -g drizzle-kit@0.31.10 2>/dev/null &&
+              drizzle-kit migrate
+          envFrom:
+            - configMapRef:
+                name: acquisitions-config
+            - secretRef:
+                name: acquisitions-secret
