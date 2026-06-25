@@ -22,7 +22,8 @@ export const fetchAllRequisitions = async (req, res, next) => {
     const filters = {};
 
     if (req.query.status) filters.status = req.query.status;
-    if (req.query.department) filters.department = req.query.department;
+    if (req.query.department_id)
+      filters.department_id = req.query.department_id;
 
     // Regular users can only see their own requisitions
     if (req.user.role !== 'admin') {
@@ -205,6 +206,10 @@ export const approveRequisitionById = async (req, res, next) => {
       e.message ===
       'Only requisitions with status "pending_approval" can be approved'
     ) {
+      return res.status(409).json({ error: e.message });
+    }
+
+    if (e.message && e.message.includes('Insufficient budget')) {
       return res.status(409).json({ error: e.message });
     }
 

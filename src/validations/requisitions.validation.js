@@ -7,7 +7,7 @@ export const requisitionIdSchema = z.object({
 export const createRequisitionSchema = z.object({
   title: z.string().min(2).max(255).trim(),
   description: z.string().trim().optional(),
-  department: z.string().min(2).max(255).trim(),
+  department_id: z.coerce.number().int().positive(),
   quantity: z.coerce.number().int().positive(),
   estimated_cost: z.coerce.number().positive(),
   vendor_id: z.coerce.number().int().positive().optional().nullable(),
@@ -18,7 +18,7 @@ export const updateRequisitionSchema = z
   .object({
     title: z.string().min(2).max(255).trim().optional(),
     description: z.string().trim().optional(),
-    department: z.string().min(2).max(255).trim().optional(),
+    department_id: z.coerce.number().int().positive().optional(),
     quantity: z.coerce.number().int().positive().optional(),
     estimated_cost: z.coerce.number().positive().optional(),
     vendor_id: z.coerce.number().int().positive().optional().nullable(),

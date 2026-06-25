@@ -10,6 +10,8 @@ import vendorsRoutes from '#routes/vendors.route.js';
 import requisitionsRoutes from '#routes/requisitions.route.js';
 import purchaseOrdersRoutes from '#routes/purchase_orders.route.js';
 import assetsRoutes from '#routes/assets.route.js';
+import departmentsRoutes from '#routes/departments.route.js';
+import budgetsRoutes from '#routes/budgets.route.js';
 import securityMiddleware from '#middleware/security.middleware.js';
 
 const app = express();
@@ -54,6 +56,8 @@ app.use('/api/vendors', vendorsRoutes);
 app.use('/api/requisitions', requisitionsRoutes);
 app.use('/api/purchase-orders', purchaseOrdersRoutes);
 app.use('/api/assets', assetsRoutes);
+app.use('/api/departments', departmentsRoutes);
+app.use('/api/budgets', budgetsRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route Not found!' });

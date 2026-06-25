@@ -2,6 +2,10 @@ import { eq, and, desc } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { requisitions } from '#models/requisition.model.js';
+import {
+  checkBudgetAvailability,
+  deductFromBudget,
+} from '#services/budgets.service.js';
 
 export const getAllRequisitions = async (filters = {}) => {
   try {
@@ -11,8 +15,8 @@ export const getAllRequisitions = async (filters = {}) => {
       conditions.push(eq(requisitions.status, filters.status));
     }
 
-    if (filters.department) {
-      conditions.push(eq(requisitions.department, filters.department));
+    if (filters.department_id) {
+      conditions.push(eq(requisitions.department_id, filters.department_id));
     }
 
     if (filters.requested_by) {
@@ -104,7 +108,12 @@ export const updateRequisition = async (id, updates) => {
 export const approveRequisition = async (id, adminId, notes) => {
   try {
     const [existing] = await db
-      .select({ id: requisitions.id, status: requisitions.status })
+      .select({
+        id: requisitions.id,
+        status: requisitions.status,
+        estimated_cost: requisitions.estimated_cost,
+        department_id: requisitions.department_id,
+      })
       .from(requisitions)
       .where(eq(requisitions.id, id))
       .limit(1);
@@ -114,6 +123,17 @@ export const approveRequisition = async (id, adminId, notes) => {
     if (existing.status !== 'pending_approval') {
       throw new Error(
         'Only requisitions with status "pending_approval" can be approved'
+      );
+    }
+
+    const budgetCheck = await checkBudgetAvailability(
+      existing.department_id,
+      parseFloat(existing.estimated_cost)
+    );
+
+    if (!budgetCheck.available) {
+      throw new Error(
+        budgetCheck.message || 'Insufficient budget for this requisition'
       );
     }
 
@@ -127,6 +147,11 @@ export const approveRequisition = async (id, adminId, notes) => {
       })
       .where(eq(requisitions.id, id))
       .returning();
+
+    await deductFromBudget(
+      existing.department_id,
+      parseFloat(existing.estimated_cost)
+    );
 
     logger.info(`Requisition (ID: ${id}) approved by admin ${adminId}`);
 

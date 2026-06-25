@@ -9,12 +9,15 @@ import {
 } from 'drizzle-orm/pg-core';
 import { users } from './user.model.js';
 import { vendors } from './vendor.model.js';
+import { departments } from './department.model.js';
 
 export const requisitions = pgTable('requisitions', {
   id: serial('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
   description: text('description'),
-  department: varchar('department', { length: 255 }).notNull(),
+  department_id: integer('department_id')
+    .notNull()
+    .references(() => departments.id),
   quantity: integer('quantity').notNull(),
   estimated_cost: decimal('estimated_cost', {
     precision: 12,
