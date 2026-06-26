@@ -7,8 +7,6 @@ spec:
   template:
     spec:
       restartPolicy: Never
-      hostNetwork: true
-      dnsPolicy: Default
       volumes:
         - name: tmp
           emptyDir: {}
@@ -18,13 +16,10 @@ spec:
           imagePullPolicy: IfNotPresent
           command:
             - node
-            - scripts/migrate.js
-          envFrom:
-            - configMapRef:
-                name: acquisitions-config
-            - secretRef:
-                name: acquisitions-secret
+            - scripts/migrate.local.js
           env:
+            - name: DATABASE_URL
+              value: postgresql://acquisitions:acquisitions@postgres:5432/acquisitions
             - name: TMPDIR
               value: /tmp
           volumeMounts:

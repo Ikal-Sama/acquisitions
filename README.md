@@ -1,14 +1,14 @@
-# Acquisitions — Docker & Neon Setup
+# Acquisitions
 
-This project is a Node.js / Express + Drizzle ORM service that talks to a
-**Postgres** database. It runs in two modes:
+A Node.js / Express + Drizzle ORM REST API talking to **Postgres**. Runs via
+Docker Compose (dev/prod) or on **Kubernetes** (Minikube or cloud).
 
-| Environment | Database                    | How it runs                                      |
-| ----------- | --------------------------- | ------------------------------------------------ |
-| Development | **Neon Local** (in Docker)  | `docker-compose.dev.yml` + ephemeral branch      |
-| Production  | **Neon Cloud** (serverless) | `docker-compose.prod.yml` against `DATABASE_URL` |
-
-The same image is used in both — only the environment variables change.
+| Mode          | Database                         | How to run                                                  |
+| ------------- | -------------------------------- | ----------------------------------------------------------- |
+| Dev (Docker)  | **Neon Local** (ephemeral proxy) | `npm run dev:docker`                                        |
+| Prod (Docker) | **Neon Cloud** (serverless)      | `docker compose -f docker-compose.prod.yml up`              |
+| Local K8s     | **In-cluster Postgres 16**       | `./scripts/k8s-minikube.sh up:local`                        |
+| Cloud K8s     | **Neon Cloud** (serverless)      | `./scripts/k8s-minikube.sh up` (requires `.env.production`) |
 
 ---
 
@@ -178,7 +178,91 @@ docker run --rm \
 
 ---
 
-## 5. How `DATABASE_URL` is selected
+## 5. Publishing the Docker image
+
+Tag and push to your registry for use in Kubernetes or other orchestrators:
+
+```bash
+# Tag with your registry and desired tag
+docker tag acquisitions:prod docker.io/<username>/acquisitions:latest
+docker tag acquisitions:prod docker.io/<username>/acquisitions:<version>
+
+# Push
+docker push docker.io/<username>/acquisitions:latest
+```
+
+The production image is built via:
+
+```bash
+docker build --target runtime -t acquisitions:prod .
+```
+
+Update `k8s/deployment.yaml` and `k8s/migration-job.yaml` to reference your
+published image (`image: <username>/acquisitions:latest`) before deploying
+to a remote cluster.
+
+---
+
+## 6. Kubernetes — Minikube (local)
+
+### One-command deploy
+
+```bash
+# Uses Neon Cloud (requires .env.production with DATABASE_URL)
+./scripts/k8s-minikube.sh up
+
+# Uses an in-cluster Postgres 16 (no cloud dependencies)
+./scripts/k8s-minikube.sh up:local
+```
+
+Both commands: build the image, load it into Minikube, apply manifests,
+run migrations, and deploy the app.
+
+### Other script commands
+
+```bash
+./scripts/k8s-minikube.sh down     # remove workloads (keeps namespace + secrets)
+./scripts/k8s-minikube.sh status   # show pods, services, and the app URL
+./scripts/k8s-minikube.sh logs     # tail app logs
+```
+
+### Access the API
+
+```bash
+# Option A: Port-forward
+kubectl port-forward -n acquisitions svc/acquisitions-service 3000:3000
+curl http://localhost:3000/health
+
+# Option B: Minikube tunnel
+minikube service acquisitions-service -n acquisitions --url
+# → http://127.0.0.1:<random-port>
+```
+
+Both options survive laptop sleep; after a reboot run `minikube start` first.
+
+### K8s manifests (`k8s/`)
+
+| File                       | Purpose                                     |
+| -------------------------- | ------------------------------------------- |
+| `namespace.yaml`           | `acquisitions` namespace                    |
+| `configmap.yaml`           | Non-sensitive env vars (`NODE_ENV`, etc.)   |
+| `secret.yaml`              | `DATABASE_URL`, `ARCJET_KEY`, `JWT_SECRET`  |
+| `secret.example.yaml`      | Template for creating secrets via `kubectl` |
+| `deployment.yaml`          | App deployment (Neon Cloud)                 |
+| `service.yaml`             | NodePort service for the app                |
+| `migration-job.yaml`       | Runs `drizzle-kit migrate` on deploy        |
+| `postgres.yaml`            | In-cluster Postgres 16 StatefulSet          |
+| `postgres-service.yaml`    | ClusterIP service for Postgres              |
+| `local/deployment.yaml`    | App deployment (local Postgres)             |
+| `local/migration-job.yaml` | Migration job using local Postgres          |
+
+The local variants (`k8s/local/`) hardcode `DATABASE_URL` to
+`postgres://acquisitions:acquisitions@postgres:5432/acquisitions` and do
+not require a ConfigMap or external secrets.
+
+---
+
+## 7. How `DATABASE_URL` is selected
 
 | Stack                      | Source                                                                                        |
 | -------------------------- | --------------------------------------------------------------------------------------------- |
@@ -191,20 +275,39 @@ code changes required.
 
 ---
 
-## 6. File map
+## 8. File map
 
 ```
-Dockerfile                  # multi-stage Node 22 Alpine build
+Dockerfile                     # multi-stage Node 22 Alpine build
 .dockerignore
-docker-compose.dev.yml      # app + neon-local
-docker-compose.prod.yml     # app only, Neon Cloud DATABASE_URL
-.env.development.example    # copy to .env.development
-.env.production.example     # copy to .env.production
+docker-compose.dev.yml         # app + neon-local
+docker-compose.prod.yml        # app only, Neon Cloud DATABASE_URL
+.env.development.example       # copy to .env.development
+.env.production.example        # copy to .env.production
+scripts/
+├── dev.sh                     # entry for npm run dev:docker
+├── prod.sh                    # entry for npm run prod:docker
+├── k8s-minikube.sh            # deploy to minikube (up/up:local/down/status/logs)
+├── migrate.js                 # migrate via drizzle-orm/neon-http
+└── migrate.local.js           # migrate via drizzle-orm/node-postgres (for local K8s Postgres)
+k8s/
+├── namespace.yaml             # acquisitions namespace
+├── configmap.yaml             # non-sensitive env vars
+├── secret.yaml                # sensitive env vars (committed for dev convenience)
+├── secret.example.yaml        # template for cloud deployment
+├── deployment.yaml            # app deployment (Neon Cloud)
+├── service.yaml               # NodePort service
+├── migration-job.yaml         # migration job (Neon Cloud)
+├── postgres.yaml              # in-cluster Postgres StatefulSet
+├── postgres-service.yaml      # Postgres ClusterIP service
+└── local/
+    ├── deployment.yaml        # app deployment (local Postgres)
+    └── migration-job.yaml     # migration job (local Postgres)
 ```
 
 ---
 
-## 7. Troubleshooting
+## 9. Troubleshooting
 
 - **`connection refused` on `neon-local:5432`** — the proxy takes a few
   seconds to provision the ephemeral branch on first start. The `app`

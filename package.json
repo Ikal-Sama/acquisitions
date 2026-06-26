@@ -29,6 +29,8 @@
     "db:migrate": "drizzle-kit migrate",
     "dev:docker": "sh ./scripts/dev.sh",
     "prod:docker": "sh ./scripts/prod.sh",
+    "k8s:minikube": "sh ./scripts/k8s-minikube.sh",
+    "k8s:minikube:down": "sh ./scripts/k8s-minikube.sh down",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "repository": {
@@ -50,14 +52,15 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
+    "drizzle-kit": "^0.31.10",
     "drizzle-orm": "^0.45.2",
     "express": "^5.2.1",
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.11.0",
+    "pg": "^8.22.0",
     "winston": "^3.19.0",
-    "zod": "^4.4.3",
-    "drizzle-kit": "^0.31.10"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

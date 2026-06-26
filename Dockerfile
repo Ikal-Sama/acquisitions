@@ -33,6 +33,7 @@ COPY --from=builder --chown=node:node /app/package.json ./package.json
 COPY --from=builder --chown=node:node /app/drizzle.config.js ./drizzle.config.js
 COPY --from=builder --chown=node:node /app/drizzle ./drizzle
 COPY --from=builder --chown=node:node /app/src ./src
+COPY --from=builder --chown=node:node /app/scripts ./scripts
 
 # Pre-create the logs directory and chown it to the node user so the
 # Winston file transports (logs/error.log, logs/combined.log) can write

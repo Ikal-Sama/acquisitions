@@ -6,7 +6,7 @@ metadata:
   labels:
     app: acquisitions
 spec:
-  type: NodePort
+  type: NodePort # change to LoadBalancer if running in cloud
   selector:
     app: acquisitions
   ports:
