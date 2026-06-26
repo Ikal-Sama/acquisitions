@@ -19,6 +19,13 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
+      hostAliases:
+        - ip: '172.19.0.1'
+          hostnames:
+            - 'neon-local'
+      volumes:
+        - name: logs
+          emptyDir: {}
       containers:
         - name: app
           image: acquisitions:prod
@@ -57,6 +64,9 @@ spec:
               port: 3000
             initialDelaySeconds: 10
             periodSeconds: 10
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
           resources:
             requests:
               memory: '128Mi'
