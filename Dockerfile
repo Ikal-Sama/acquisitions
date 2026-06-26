@@ -30,6 +30,7 @@ ENV NODE_ENV=production \
 # Copy production-ready artifacts from the builder
 COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/package.json ./package.json
+COPY --from=builder --chown=node:node /app/drizzle.config.js ./drizzle.config.js
 COPY --from=builder --chown=node:node /app/drizzle ./drizzle
 COPY --from=builder --chown=node:node /app/src ./src
 

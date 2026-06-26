@@ -22,6 +22,8 @@ spec:
       volumes:
         - name: logs
           emptyDir: {}
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: app
           image: acquisitions:prod
@@ -34,6 +36,9 @@ spec:
                 name: acquisitions-config
             - secretRef:
                 name: acquisitions-secret
+          env:
+            - name: TMPDIR
+              value: /tmp
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -63,6 +68,8 @@ spec:
           volumeMounts:
             - name: logs
               mountPath: /app/logs
+            - name: tmp
+              mountPath: /tmp
           resources:
             requests:
               memory: '128Mi'

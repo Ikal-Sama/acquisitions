@@ -7,19 +7,25 @@ spec:
   template:
     spec:
       restartPolicy: Never
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: migrate
           image: acquisitions:prod
           imagePullPolicy: IfNotPresent
           command:
-            - sh
-            - -c
-            - |
-              npm install -g drizzle-kit@0.31.10 2>/dev/null
-              drizzle-kit push 2>&1 || true
-              drizzle-kit migrate
+            - npx
+            - drizzle-kit
+            - migrate
           envFrom:
             - configMapRef:
                 name: acquisitions-config
             - secretRef:
                 name: acquisitions-secret
+          env:
+            - name: TMPDIR
+              value: /tmp
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
