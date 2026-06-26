@@ -19,10 +19,6 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
-      hostAliases:
-        - ip: '172.19.0.1'
-          hostnames:
-            - 'neon-local'
       volumes:
         - name: logs
           emptyDir: {}

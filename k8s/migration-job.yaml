@@ -15,7 +15,8 @@ spec:
             - sh
             - -c
             - |
-              npm install -g drizzle-kit@0.31.10 2>/dev/null &&
+              npm install -g drizzle-kit@0.31.10 2>/dev/null
+              drizzle-kit push 2>&1 || true
               drizzle-kit migrate
           envFrom:
             - configMapRef:
