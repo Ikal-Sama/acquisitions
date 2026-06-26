@@ -32,10 +32,7 @@ services:
   neon-local:
     image: neondatabase/neon_local:latest
     container_name: acquisitions-neon-local
-    networks:
-      - acquisitions-net
-    ports:
-      - '5432:5432'
+    network_mode: host
     env_file:
       - .env.development
     healthcheck:
@@ -59,13 +56,16 @@ services:
       network: host
     container_name: acquisitions-app-dev
     image: acquisitions:dev
-    networks:
-      - acquisitions-net
+    network_mode: host
     depends_on:
       neon-local:
         condition: service_started
     env_file:
       - .env.development
+    environment:
+      # Override DATABASE_URL to use Neon Local proxy (via localhost on host network)
+      - DATABASE_URL=postgres://neon:npg@localhost:5432/neondb?sslmode=require
+      - NODE_ENV=development
     volumes:
       # Mount source for live reloads during local development
       - ./src:/app/src:ro

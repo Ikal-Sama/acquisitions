@@ -6,5 +6,6 @@ node_modules
 !.env.production.example
 logs
 coverage
+k8s/secret.yaml
 .neon_local
 .neon_local/
