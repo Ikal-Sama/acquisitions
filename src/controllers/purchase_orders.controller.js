@@ -4,6 +4,7 @@ import {
   paginationMeta,
   parseSort,
   parseFields,
+  parseFilters,
 } from '#utils/pagination.js';
 import {
   getAllPurchaseOrders,
@@ -29,13 +30,23 @@ import {
 } from '#validations/purchase_orders.validation.js';
 import { formatValidationError } from '#utils/format.js';
 
+const FILTER_CONFIG = {
+  status: { type: 'string', operators: ['eq'] },
+  vendor_id: { type: 'integer', operators: ['eq'] },
+  requisition_id: { type: 'integer', operators: ['eq'] },
+  created_by: { type: 'integer', operators: ['eq'] },
+  total_amount: { type: 'number', operators: ['eq', 'gte', 'lte', 'gt', 'lt'] },
+  expected_delivery_date: {
+    type: 'date',
+    operators: ['gte', 'lte', 'gt', 'lt'],
+  },
+  created_at: { type: 'date', operators: ['gte', 'lte', 'gt', 'lt'] },
+  updated_at: { type: 'date', operators: ['gte', 'lte', 'gt', 'lt'] },
+};
+
 export const fetchAllPurchaseOrders = async (req, res, next) => {
   try {
-    const filters = {};
-
-    if (req.query.status) filters.status = req.query.status;
-    if (req.query.vendor_id) filters.vendor_id = req.query.vendor_id;
-
+    const filters = parseFilters(req.query, FILTER_CONFIG);
     const pagination = parsePagination(req.query);
     const search = req.query.search || '';
     const sort = parseSort(req.query, [

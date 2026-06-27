@@ -1,4 +1,16 @@
-import { eq, and, asc, desc, ilike, or, sql } from 'drizzle-orm';
+import {
+  eq,
+  and,
+  asc,
+  desc,
+  ilike,
+  or,
+  sql,
+  gte,
+  lte,
+  gt,
+  lt,
+} from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { requisitions } from '#models/requisition.model.js';
@@ -8,8 +20,24 @@ import {
   deductFromBudget,
 } from '#services/budgets.service.js';
 
+const applyFilters = (model, filters) =>
+  filters.map(f => {
+    switch (f.operator) {
+      case 'eq':
+        return eq(model[f.field], f.value);
+      case 'gte':
+        return gte(model[f.field], f.value);
+      case 'lte':
+        return lte(model[f.field], f.value);
+      case 'gt':
+        return gt(model[f.field], f.value);
+      case 'lt':
+        return lt(model[f.field], f.value);
+    }
+  });
+
 export const getAllRequisitions = async (
-  filters = {},
+  filters = [],
   pagination = {},
   search = '',
   sort = [],
@@ -18,19 +46,7 @@ export const getAllRequisitions = async (
   try {
     const { limit, offset } = pagination;
 
-    const conditions = [];
-
-    if (filters.status) {
-      conditions.push(eq(requisitions.status, filters.status));
-    }
-
-    if (filters.department_id) {
-      conditions.push(eq(requisitions.department_id, filters.department_id));
-    }
-
-    if (filters.requested_by) {
-      conditions.push(eq(requisitions.requested_by, filters.requested_by));
-    }
+    const conditions = [...applyFilters(requisitions, filters)];
 
     if (search) {
       conditions.push(

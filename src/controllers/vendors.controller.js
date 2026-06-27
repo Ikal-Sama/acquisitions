@@ -4,6 +4,7 @@ import {
   paginationMeta,
   parseSort,
   parseFields,
+  parseFilters,
 } from '#utils/pagination.js';
 import {
   getAllVendors,
@@ -19,10 +20,19 @@ import {
 } from '#validations/vendors.validation.js';
 import { formatValidationError } from '#utils/format.js';
 
+const FILTER_CONFIG = {
+  email: { type: 'string', operators: ['eq'] },
+  phone: { type: 'string', operators: ['eq'] },
+  name: { type: 'string', operators: ['eq'] },
+  created_at: { type: 'date', operators: ['gte', 'lte', 'gt', 'lt'] },
+  updated_at: { type: 'date', operators: ['gte', 'lte', 'gt', 'lt'] },
+};
+
 export const fetchAllVendors = async (req, res, next) => {
   try {
     logger.info('Getting all vendors...');
 
+    const filters = parseFilters(req.query, FILTER_CONFIG);
     const pagination = parsePagination(req.query);
     const search = req.query.search || '';
     const sort = parseSort(req.query, ['name', 'email', 'created_at']);
@@ -35,6 +45,7 @@ export const fetchAllVendors = async (req, res, next) => {
     ]);
 
     const { data, total } = await getAllVendors(
+      filters,
       pagination,
       search,
       sort,

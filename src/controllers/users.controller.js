@@ -4,6 +4,7 @@ import {
   paginationMeta,
   parseSort,
   parseFields,
+  parseFilters,
 } from '#utils/pagination.js';
 import {
   getAllUsers,
@@ -17,10 +18,17 @@ import {
 } from '#validations/users.validation.js';
 import { formatValidationError } from '#utils/format.js';
 
+const FILTER_CONFIG = {
+  role: { type: 'string', operators: ['eq'] },
+  created_at: { type: 'date', operators: ['gte', 'lte', 'gt', 'lt'] },
+  updated_at: { type: 'date', operators: ['gte', 'lte', 'gt', 'lt'] },
+};
+
 export const fetchAllUsers = async (req, res, next) => {
   try {
     logger.info('Getting users...');
 
+    const filters = parseFilters(req.query, FILTER_CONFIG);
     const pagination = parsePagination(req.query);
     const search = req.query.search || '';
     const sort = parseSort(req.query, ['name', 'email', 'role', 'created_at']);
@@ -31,7 +39,13 @@ export const fetchAllUsers = async (req, res, next) => {
       'created_at',
     ]);
 
-    const { data, total } = await getAllUsers(pagination, search, sort, fields);
+    const { data, total } = await getAllUsers(
+      filters,
+      pagination,
+      search,
+      sort,
+      fields
+    );
 
     res.status(200).json({
       message: 'Successfully retrieved users',

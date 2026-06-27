@@ -4,6 +4,7 @@ import {
   paginationMeta,
   parseSort,
   parseFields,
+  parseFilters,
 } from '#utils/pagination.js';
 import {
   getAllRequisitions,
@@ -23,17 +24,32 @@ import {
 } from '#validations/requisitions.validation.js';
 import { formatValidationError } from '#utils/format.js';
 
+const FILTER_CONFIG = {
+  status: { type: 'string', operators: ['eq'] },
+  department_id: { type: 'integer', operators: ['eq'] },
+  requested_by: { type: 'integer', operators: ['eq'] },
+  approved_by: { type: 'integer', operators: ['eq'] },
+  vendor_id: { type: 'integer', operators: ['eq'] },
+  quantity: { type: 'integer', operators: ['gte', 'lte', 'gt', 'lt'] },
+  estimated_cost: {
+    type: 'number',
+    operators: ['eq', 'gte', 'lte', 'gt', 'lt'],
+  },
+  created_at: { type: 'date', operators: ['gte', 'lte', 'gt', 'lt'] },
+  updated_at: { type: 'date', operators: ['gte', 'lte', 'gt', 'lt'] },
+};
+
 export const fetchAllRequisitions = async (req, res, next) => {
   try {
-    const filters = {};
-
-    if (req.query.status) filters.status = req.query.status;
-    if (req.query.department_id)
-      filters.department_id = req.query.department_id;
+    const filters = parseFilters(req.query, FILTER_CONFIG);
 
     // Regular users can only see their own requisitions
     if (req.user.role !== 'admin') {
-      filters.requested_by = req.user.id;
+      filters.push({
+        field: 'requested_by',
+        operator: 'eq',
+        value: req.user.id,
+      });
     }
 
     const pagination = parsePagination(req.query);

@@ -1,26 +1,35 @@
-import { eq, and, asc, desc, sql } from 'drizzle-orm';
+import { eq, and, asc, desc, sql, gte, lte, gt, lt } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { budgets } from '#models/budget.model.js';
 
+const applyFilters = (model, filters) =>
+  filters.map(f => {
+    switch (f.operator) {
+      case 'eq':
+        return eq(model[f.field], f.value);
+      case 'gte':
+        return gte(model[f.field], f.value);
+      case 'lte':
+        return lte(model[f.field], f.value);
+      case 'gt':
+        return gt(model[f.field], f.value);
+      case 'lt':
+        return lt(model[f.field], f.value);
+    }
+  });
+
 export const getAllBudgets = async (
-  filters = {},
+  filters = [],
   pagination = {},
+  _search = '',
   sort = [],
   fields = []
 ) => {
   try {
     const { limit, offset } = pagination;
 
-    const conditions = [];
-
-    if (filters.department_id) {
-      conditions.push(eq(budgets.department_id, filters.department_id));
-    }
-
-    if (filters.fiscal_year) {
-      conditions.push(eq(budgets.fiscal_year, filters.fiscal_year));
-    }
+    const conditions = [...applyFilters(budgets, filters)];
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 
