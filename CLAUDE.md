@@ -251,3 +251,66 @@ Checklist before declaring work done:
 5. No secrets in code, logs, or responses.
 6. Error paths return structured JSON, not raw stack traces.
 7. Validation runs at the controller boundary for any new endpoint.
+
+---
+
+## 8. Git workflow & CodeRabbit review
+
+### Feature branches
+
+- Every feature/fix gets its own branch from `main`.
+- Branch naming: `feature/<short-description>` or `fix/<short-description>`.
+- Never commit directly to `main`.
+
+### Before pushing
+
+1. Run `npm run lint` and `npm run format:check` — must pass.
+2. Run `coderabbit doctor` to verify the CLI is ready.
+3. Commit with a clear, concise message (present tense, no period).
+
+### Creating a PR
+
+1. Push the branch to origin:
+   ```bash
+   git push origin <branch-name>
+   ```
+2. Create a PR via `gh` CLI targeting `main`:
+   ```bash
+   gh pr create --title "<title>" --body "<description>" --base main
+   ```
+3. The PR title should follow conventional commits style:
+   `feat:`, `fix:`, `refactor:`, `docs:`, etc.
+
+### CodeRabbit review process
+
+- After creating a PR, run:
+  ```bash
+  coderabbit review
+  ```
+- Review all findings before merging.
+- If coderabbit flags issues, fix them in new commits on the same
+  branch (do NOT squash/rebase until after review is satisfied).
+- Re-run `coderabbit review` after pushing fixes to verify resolution.
+
+### Merging
+
+1. All coderabbit findings must be resolved or explicitly acknowledged.
+2. Lint/format checks must pass on the branch.
+3. Merge via the GitHub UI (no fast-forward) or:
+   ```bash
+   gh pr merge --squash
+   ```
+4. Delete the branch after merge.
+
+---
+
+## 9. CodeRabbit CLI usage reference
+
+| Command                     | Purpose                             |
+| --------------------------- | ----------------------------------- |
+| `coderabbit doctor`         | Check CLI readiness                 |
+| `coderabbit auth login`     | Authenticate with GitHub            |
+| `coderabbit review`         | Review all local changes (default)  |
+| `coderabbit review --agent` | Emit structured findings for agents |
+| `coderabbit stats`          | Show review statistics              |
+| `coderabbit update`         | Update CLI to latest version        |
