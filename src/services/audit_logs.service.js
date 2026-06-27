@@ -41,6 +41,8 @@ const applyFilters = filters =>
         return gt(column, f.value);
       case 'lt':
         return lt(column, f.value);
+      default:
+        throw new Error(`Unsupported filter operator: ${f.operator}`);
     }
   });
 

@@ -150,7 +150,7 @@ export const createNewRequisition = async (req, res, next) => {
     logAudit(req.user.id, 'CREATE', 'requisition', requisition.id, {
       title: requisition.title,
       estimated_cost: requisition.estimated_cost,
-    });
+    }).catch(() => {});
 
     res.status(201).json({
       message: 'Requisition created successfully',
@@ -246,7 +246,9 @@ export const approveRequisitionById = async (req, res, next) => {
 
     const requisition = await approveRequisition(id, req.user.id, notes);
 
-    logAudit(req.user.id, 'APPROVE', 'requisition', id, { notes });
+    logAudit(req.user.id, 'APPROVE', 'requisition', id, { notes }).catch(
+      () => {}
+    );
 
     res.status(200).json({
       message: 'Requisition approved successfully',
@@ -300,7 +302,9 @@ export const rejectRequisitionById = async (req, res, next) => {
 
     const requisition = await rejectRequisition(id, req.user.id, notes);
 
-    logAudit(req.user.id, 'REJECT', 'requisition', id, { notes });
+    logAudit(req.user.id, 'REJECT', 'requisition', id, { notes }).catch(
+      () => {}
+    );
 
     res.status(200).json({
       message: 'Requisition rejected successfully',
@@ -342,7 +346,7 @@ export const deleteRequisitionById = async (req, res, next) => {
 
     logAudit(req.user.id, 'DELETE', 'requisition', id, {
       title: requisition.title,
-    });
+    }).catch(() => {});
 
     res.status(200).json({
       message: 'Requisition deleted successfully',

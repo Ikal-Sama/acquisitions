@@ -29,7 +29,7 @@ export const signup = async (req, res, next) => {
 
     cookies.set(res, 'token', token);
 
-    logAudit(user.id, 'REGISTER', 'user', user.id, { email });
+    logAudit(user.id, 'REGISTER', 'user', user.id, { email }).catch(() => {});
 
     logger.info(`User registered successfully: ${email}`);
     res.status(201).json({

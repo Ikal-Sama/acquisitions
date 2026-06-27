@@ -128,7 +128,7 @@ export const createNewAsset = async (req, res, next) => {
     logAudit(req.user.id, 'CREATE', 'asset', asset.id, {
       name: asset.name,
       asset_tag: asset.asset_tag,
-    });
+    }).catch(() => {});
 
     res.status(201).json({
       message: 'Asset created successfully',
@@ -211,7 +211,7 @@ export const assignAssetById = async (req, res, next) => {
     logAudit(req.user.id, 'ASSIGN', 'asset', id, {
       assigned_to,
       name: asset.name,
-    });
+    }).catch(() => {});
 
     res.status(200).json({
       message: 'Asset assigned successfully',
@@ -250,7 +250,7 @@ export const unassignAssetById = async (req, res, next) => {
 
     logAudit(req.user.id, 'UNASSIGN', 'asset', id, {
       name: asset.name,
-    });
+    }).catch(() => {});
 
     res.status(200).json({
       message: 'Asset unassigned successfully',
@@ -286,7 +286,7 @@ export const deleteAssetById = async (req, res, next) => {
     logAudit(req.user.id, 'DELETE', 'asset', id, {
       name: asset.name,
       asset_tag: asset.asset_tag,
-    });
+    }).catch(() => {});
 
     res.status(200).json({
       message: 'Asset deleted successfully',
