@@ -17,10 +17,7 @@ describe('Analytics API', () => {
         .set('Cookie', 'token=invalid-token')
         .expect(401);
 
-      expect(response.body).toHaveProperty(
-        'error',
-        'Invalid or expired token'
-      );
+      expect(response.body).toHaveProperty('error', 'Invalid or expired token');
     });
   });
 

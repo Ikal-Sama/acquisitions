@@ -86,9 +86,7 @@ describe('API Endpoints', () => {
     });
 
     it('should return JSON for errors', async () => {
-      const response = await request(app)
-        .post('/api/auth/sign-up')
-        .send({});
+      const response = await request(app).post('/api/auth/sign-up').send({});
 
       expect(response.body).toHaveProperty('error', 'Validation failed');
     });

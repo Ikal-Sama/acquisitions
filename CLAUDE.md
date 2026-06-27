@@ -255,54 +255,89 @@ Checklist before declaring work done:
 
 ---
 
-## 8. Git workflow & CodeRabbit review
+## 8. Development workflow (mandatory cycle)
 
-### Feature branches
+Every feature or fix **must** follow this exact cycle.
+Do not skip or reorder steps.
 
-- Every feature/fix gets its own branch from `main`.
-- Branch naming: `feature/<short-description>` or `fix/<short-description>`.
+```
+1. CREATE BRANCH   →  git checkout -b feature/<name>
+2. MAKE CHANGES    →  write code, new files, etc.
+3. LINT & FORMAT   →  npm run lint && npm run format:check
+4. TEST            →  npm test
+5. PUSH + PR       →  git push + gh pr create
+6. REVIEW          →  coderabbit review
+7. FIX & RE-REVIEW →  if findings → commit fix → repeat from step 3
+8. MERGE           →  gh pr merge --squash  (only when step 6 is clean)
+9. CLEANUP         →  delete local & remote branch
+```
+
+### Step details
+
+**1. Branch** — always from `main`. Naming:
+
+- `feature/<short-description>` for new functionality.
+- `fix/<short-description>` for bug fixes.
 - Never commit directly to `main`.
 
-### Before pushing
+**2. Changes** — follow the layering rules in §2 and conventions in §5.
 
-1. Run `npm run lint` and `npm run format:check` — must pass.
-2. Run `npm test` — all tests pass.
-3. Run `coderabbit doctor` to verify the CLI is ready.
-4. Commit with a clear, concise message (present tense, no period).
+**3. Lint & format** — must pass before anything else.
 
-### Creating a PR
+```bash
+npm run lint
+npm run format:check
+```
 
-1. Push the branch to origin:
-   ```bash
-   git push origin <branch-name>
-   ```
-2. Create a PR via `gh` CLI targeting `main`:
-   ```bash
-   gh pr create --title "<title>" --body "<description>" --base main
-   ```
-3. The PR title should follow conventional commits style:
-   `feat:`, `fix:`, `refactor:`, `docs:`, etc.
+**4. Test** — all 95+ tests must pass. If you added new code, also add
+new tests for it.
 
-### CodeRabbit review process
+```bash
+npm test
+```
 
-- After creating a PR, run:
-  ```bash
-  coderabbit review
-  ```
-- Review all findings before merging.
-- If coderabbit flags issues, fix them in new commits on the same
-  branch (do NOT squash/rebase until after review is satisfied).
-- Re-run `coderabbit review` after pushing fixes to verify resolution.
+**5. Push & PR** — commit → push → create PR against `main`.
 
-### Merging
+```bash
+git add <files>
+git commit -m "type: short description"
+git push origin <branch-name>
+gh pr create --title "type: title" --body "description" --base main
+```
 
-1. All coderabbit findings must be resolved or explicitly acknowledged.
-2. Lint/format checks must pass on the branch.
-3. Merge via the GitHub UI (no fast-forward) or:
-   ```bash
-   gh pr merge --squash
-   ```
-4. Delete the branch after merge.
+**6. CodeRabbit review** — run after PR is created.
+
+```bash
+coderabbit doctor   # verify readiness
+coderabbit review   # review the PR
+```
+
+**7. Fix & re-review** — if coderabbit reports any findings, fix them in
+new commits on the same branch. Do NOT squash or rebase until review
+passes. After pushing fixes, re-run:
+
+```bash
+coderabbit review
+```
+
+    Repeat steps 3–7 until review returns **"No findings"**.
+
+**8. Merge** — only when:
+
+- Lint & format pass.
+- All tests pass.
+- CodeRabbit reports **0 findings** (or explicitly acknowledged).
+
+```bash
+gh pr merge --squash
+```
+
+**9. Cleanup** — remove the branch locally and on origin.
+
+```bash
+git branch -D <branch-name>
+git push origin --delete <branch-name>
+```
 
 ---
 

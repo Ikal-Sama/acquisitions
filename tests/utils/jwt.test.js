@@ -48,17 +48,13 @@ describe('jwttoken', () => {
       const parts = token.split('.');
       const tampered = `${parts[0]}.${parts[1]}.tampered`;
 
-      expect(() => jwttoken.verify(tampered)).toThrow(
-        'Failed to verify token'
-      );
+      expect(() => jwttoken.verify(tampered)).toThrow('Failed to verify token');
     });
 
     it('should throw for an expired token', () => {
       const expired = jwt.sign(payload, JWT_SECRET, { expiresIn: '0s' });
 
-      expect(() => jwttoken.verify(expired)).toThrow(
-        'Failed to verify token'
-      );
+      expect(() => jwttoken.verify(expired)).toThrow('Failed to verify token');
     });
   });
 });

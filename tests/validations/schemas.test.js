@@ -1,10 +1,19 @@
 import { signupSchema, signInSchema } from '#validations/auth.validation.js';
-import { createDepartmentSchema, updateDepartmentSchema } from '#validations/departments.validation.js';
-import { createVendorSchema, updateVendorSchema } from '#validations/vendors.validation.js';
+import {
+  createDepartmentSchema,
+  updateDepartmentSchema,
+} from '#validations/departments.validation.js';
+import {
+  createVendorSchema,
+  updateVendorSchema,
+} from '#validations/vendors.validation.js';
 import { createBudgetSchema } from '#validations/budgets.validation.js';
 import { createRequisitionSchema } from '#validations/requisitions.validation.js';
 import { createPurchaseOrderSchema } from '#validations/purchase_orders.validation.js';
-import { createAssetSchema, updateAssetSchema } from '#validations/assets.validation.js';
+import {
+  createAssetSchema,
+  updateAssetSchema,
+} from '#validations/assets.validation.js';
 import { updateUserSchema } from '#validations/users.validation.js';
 
 describe('Auth Validation Schemas', () => {
