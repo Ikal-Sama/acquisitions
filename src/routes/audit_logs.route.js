@@ -1,5 +1,6 @@
 import express from 'express';
 import authenticate from '#middleware/auth.middleware.js';
+import { requireRole } from '#middleware/role.middleware.js';
 import {
   fetchAllAuditLogs,
   fetchAuditLogById,
@@ -7,7 +8,7 @@ import {
 
 const router = express.Router();
 
-router.get('/', authenticate, fetchAllAuditLogs);
-router.get('/:id', authenticate, fetchAuditLogById);
+router.get('/', authenticate, requireRole('admin'), fetchAllAuditLogs);
+router.get('/:id', authenticate, requireRole('admin'), fetchAuditLogById);
 
 export default router;

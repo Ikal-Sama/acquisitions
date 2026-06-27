@@ -16,19 +16,31 @@ import logger from '#config/logger.js';
 import { auditLogs } from '#models/audit_log.model.js';
 import { escapeLike } from '#utils/format.js';
 
-const applyFilters = (model, filters) =>
+const FIELD_MAP = {
+  action: auditLogs.action,
+  resource: auditLogs.resource,
+  resource_id: auditLogs.resourceId,
+  user_id: auditLogs.userId,
+  details: auditLogs.details,
+  created_at: auditLogs.createdAt,
+};
+
+const resolveField = field => FIELD_MAP[field] || auditLogs[field];
+
+const applyFilters = filters =>
   filters.map(f => {
+    const column = resolveField(f.field);
     switch (f.operator) {
       case 'eq':
-        return eq(model[f.field], f.value);
+        return eq(column, f.value);
       case 'gte':
-        return gte(model[f.field], f.value);
+        return gte(column, f.value);
       case 'lte':
-        return lte(model[f.field], f.value);
+        return lte(column, f.value);
       case 'gt':
-        return gt(model[f.field], f.value);
+        return gt(column, f.value);
       case 'lt':
-        return lt(model[f.field], f.value);
+        return lt(column, f.value);
     }
   });
 
@@ -62,7 +74,7 @@ export const getAllAuditLogs = async (
   try {
     const { limit, offset } = pagination;
 
-    const conditions = [...applyFilters(auditLogs, filters)];
+    const conditions = [...applyFilters(filters)];
 
     if (search) {
       conditions.push(
@@ -85,8 +97,8 @@ export const getAllAuditLogs = async (
     if (sort.length > 0) {
       orderBy = sort.map(s =>
         s.direction === 'desc'
-          ? desc(auditLogs[s.field])
-          : asc(auditLogs[s.field])
+          ? desc(resolveField(s.field))
+          : asc(resolveField(s.field))
       );
     } else {
       orderBy = [desc(auditLogs.createdAt)];
@@ -96,7 +108,7 @@ export const getAllAuditLogs = async (
 
     if (fields.length > 0) {
       queryBuilder = db
-        .select(Object.fromEntries(fields.map(f => [f, auditLogs[f]])))
+        .select(Object.fromEntries(fields.map(f => [f, resolveField(f)])))
         .from(auditLogs);
     } else {
       queryBuilder = db.select().from(auditLogs);
