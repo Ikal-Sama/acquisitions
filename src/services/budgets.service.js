@@ -1,9 +1,13 @@
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { eq, and, asc, desc, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { budgets } from '#models/budget.model.js';
 
-export const getAllBudgets = async (filters = {}, pagination = {}) => {
+export const getAllBudgets = async (
+  filters = {},
+  pagination = {},
+  sort = []
+) => {
   try {
     const { limit, offset } = pagination;
 
@@ -24,11 +28,20 @@ export const getAllBudgets = async (filters = {}, pagination = {}) => {
       .from(budgets)
       .where(where);
 
+    const orderBy =
+      sort.length > 0
+        ? sort.map(s =>
+            s.direction === 'desc'
+              ? desc(budgets[s.field])
+              : asc(budgets[s.field])
+          )
+        : [desc(budgets.fiscal_year)];
+
     const data = await db
       .select()
       .from(budgets)
       .where(where)
-      .orderBy(desc(budgets.fiscal_year))
+      .orderBy(...orderBy)
       .limit(limit)
       .offset(offset);
 

@@ -1,5 +1,9 @@
 import logger from '#config/logger.js';
-import { parsePagination, paginationMeta } from '#utils/pagination.js';
+import {
+  parsePagination,
+  paginationMeta,
+  parseSort,
+} from '#utils/pagination.js';
 import {
   getAllAssets,
   getAssetById,
@@ -29,10 +33,21 @@ export const fetchAllAssets = async (req, res, next) => {
 
     const pagination = parsePagination(req.query);
     const search = req.query.search || '';
+    const sort = parseSort(req.query, [
+      'name',
+      'asset_tag',
+      'status',
+      'created_at',
+    ]);
 
     logger.info('Getting assets...');
 
-    const { data, total } = await getAllAssets(filters, pagination, search);
+    const { data, total } = await getAllAssets(
+      filters,
+      pagination,
+      search,
+      sort
+    );
 
     res.status(200).json({
       message: 'Successfully retrieved assets',

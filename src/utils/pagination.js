@@ -21,3 +21,21 @@ export const paginationMeta = (page, limit, total) => ({
   total,
   totalPages: Math.ceil(total / limit) || 0,
 });
+
+export const parseSort = (query, allowedFields = []) => {
+  if (!query.sort) return [];
+
+  const sortFields = [];
+
+  for (const part of query.sort.split(',')) {
+    const [rawField, rawDir = 'asc'] = part.split(':');
+    const field = rawField.trim();
+    const direction = rawDir.trim().toLowerCase() === 'desc' ? 'desc' : 'asc';
+
+    if (field && allowedFields.includes(field)) {
+      sortFields.push({ field, direction });
+    }
+  }
+
+  return sortFields;
+};

@@ -1,5 +1,9 @@
 import logger from '#config/logger.js';
-import { parsePagination, paginationMeta } from '#utils/pagination.js';
+import {
+  parsePagination,
+  paginationMeta,
+  parseSort,
+} from '#utils/pagination.js';
 import {
   getAllPurchaseOrders,
   getPurchaseOrderById,
@@ -33,13 +37,20 @@ export const fetchAllPurchaseOrders = async (req, res, next) => {
 
     const pagination = parsePagination(req.query);
     const search = req.query.search || '';
+    const sort = parseSort(req.query, [
+      'po_number',
+      'status',
+      'total_amount',
+      'created_at',
+    ]);
 
     logger.info('Getting purchase orders...');
 
     const { data, total } = await getAllPurchaseOrders(
       filters,
       pagination,
-      search
+      search,
+      sort
     );
 
     res.status(200).json({

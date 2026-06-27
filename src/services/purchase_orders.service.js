@@ -1,4 +1,4 @@
-import { eq, and, desc, asc, ilike, or, sql } from 'drizzle-orm';
+import { eq, and, asc, desc, ilike, or, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import {
@@ -48,7 +48,8 @@ const recalculateTotalAmount = async poId => {
 export const getAllPurchaseOrders = async (
   filters = {},
   pagination = {},
-  search = ''
+  search = '',
+  sort = []
 ) => {
   try {
     const { limit, offset } = pagination;
@@ -79,11 +80,20 @@ export const getAllPurchaseOrders = async (
       .from(purchaseOrders)
       .where(where);
 
+    const orderBy =
+      sort.length > 0
+        ? sort.map(s =>
+            s.direction === 'desc'
+              ? desc(purchaseOrders[s.field])
+              : asc(purchaseOrders[s.field])
+          )
+        : [desc(purchaseOrders.created_at)];
+
     const data = await db
       .select()
       .from(purchaseOrders)
       .where(where)
-      .orderBy(desc(purchaseOrders.created_at))
+      .orderBy(...orderBy)
       .limit(limit)
       .offset(offset);
 

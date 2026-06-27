@@ -1,4 +1,4 @@
-import { eq, and, desc, ilike, or, sql } from 'drizzle-orm';
+import { eq, and, asc, desc, ilike, or, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { assets } from '#models/asset.model.js';
@@ -26,7 +26,8 @@ const generateAssetTag = async () => {
 export const getAllAssets = async (
   filters = {},
   pagination = {},
-  search = ''
+  search = '',
+  sort = []
 ) => {
   try {
     const { limit, offset } = pagination;
@@ -62,11 +63,20 @@ export const getAllAssets = async (
       .from(assets)
       .where(where);
 
+    const orderBy =
+      sort.length > 0
+        ? sort.map(s =>
+            s.direction === 'desc'
+              ? desc(assets[s.field])
+              : asc(assets[s.field])
+          )
+        : [desc(assets.created_at)];
+
     const data = await db
       .select()
       .from(assets)
       .where(where)
-      .orderBy(desc(assets.created_at))
+      .orderBy(...orderBy)
       .limit(limit)
       .offset(offset);
 

@@ -1,4 +1,4 @@
-import { eq, and, desc, ilike, or, sql } from 'drizzle-orm';
+import { eq, and, asc, desc, ilike, or, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { requisitions } from '#models/requisition.model.js';
@@ -11,7 +11,8 @@ import {
 export const getAllRequisitions = async (
   filters = {},
   pagination = {},
-  search = ''
+  search = '',
+  sort = []
 ) => {
   try {
     const { limit, offset } = pagination;
@@ -46,11 +47,20 @@ export const getAllRequisitions = async (
       .from(requisitions)
       .where(where);
 
+    const orderBy =
+      sort.length > 0
+        ? sort.map(s =>
+            s.direction === 'desc'
+              ? desc(requisitions[s.field])
+              : asc(requisitions[s.field])
+          )
+        : [desc(requisitions.created_at)];
+
     const data = await db
       .select()
       .from(requisitions)
       .where(where)
-      .orderBy(desc(requisitions.created_at))
+      .orderBy(...orderBy)
       .limit(limit)
       .offset(offset);
 
