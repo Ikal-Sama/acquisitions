@@ -2,6 +2,7 @@ import { eq, ilike, or, and, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { vendors } from '#models/vendor.model.js';
+import { escapeLike } from '#utils/format.js';
 
 export const getAllVendors = async (pagination = {}, search = '') => {
   try {
@@ -12,8 +13,8 @@ export const getAllVendors = async (pagination = {}, search = '') => {
     if (search) {
       conditions.push(
         or(
-          ilike(vendors.name, `%${search}%`),
-          ilike(vendors.email, `%${search}%`)
+          ilike(vendors.name, `%${escapeLike(search)}%`),
+          ilike(vendors.email, `%${escapeLike(search)}%`)
         )
       );
     }

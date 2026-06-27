@@ -2,6 +2,7 @@ import { eq, and, desc, ilike, or, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { requisitions } from '#models/requisition.model.js';
+import { escapeLike } from '#utils/format.js';
 import {
   checkBudgetAvailability,
   deductFromBudget,
@@ -32,8 +33,8 @@ export const getAllRequisitions = async (
     if (search) {
       conditions.push(
         or(
-          ilike(requisitions.title, `%${search}%`),
-          ilike(requisitions.description, `%${search}%`)
+          ilike(requisitions.title, `%${escapeLike(search)}%`),
+          ilike(requisitions.description, `%${escapeLike(search)}%`)
         )
       );
     }

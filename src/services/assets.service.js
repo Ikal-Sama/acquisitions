@@ -2,6 +2,7 @@ import { eq, and, desc, ilike, or, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { assets } from '#models/asset.model.js';
+import { escapeLike } from '#utils/format.js';
 
 const generateAssetTag = async () => {
   const year = new Date().getFullYear();
@@ -47,9 +48,9 @@ export const getAllAssets = async (
     if (search) {
       conditions.push(
         or(
-          ilike(assets.name, `%${search}%`),
-          ilike(assets.asset_tag, `%${search}%`),
-          ilike(assets.serial_number, `%${search}%`)
+          ilike(assets.name, `%${escapeLike(search)}%`),
+          ilike(assets.asset_tag, `%${escapeLike(search)}%`),
+          ilike(assets.serial_number, `%${escapeLike(search)}%`)
         )
       );
     }

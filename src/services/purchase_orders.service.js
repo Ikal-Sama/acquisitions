@@ -5,6 +5,7 @@ import {
   purchaseOrders,
   purchaseOrderItems,
 } from '#models/purchase_order.model.js';
+import { escapeLike } from '#utils/format.js';
 
 const generatePoNumber = async () => {
   const year = new Date().getFullYear();
@@ -65,8 +66,8 @@ export const getAllPurchaseOrders = async (
     if (search) {
       conditions.push(
         or(
-          ilike(purchaseOrders.po_number, `%${search}%`),
-          ilike(purchaseOrders.notes, `%${search}%`)
+          ilike(purchaseOrders.po_number, `%${escapeLike(search)}%`),
+          ilike(purchaseOrders.notes, `%${escapeLike(search)}%`)
         )
       );
     }

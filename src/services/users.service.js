@@ -3,6 +3,7 @@ import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { users } from '#models/user.model.js';
 import { hashPassword } from '#services/auth.service.js';
+import { escapeLike } from '#utils/format.js';
 
 const PUBLIC_USER_COLUMNS = {
   id: users.id,
@@ -21,7 +22,10 @@ export const getAllUsers = async (pagination = {}, search = '') => {
 
     if (search) {
       conditions.push(
-        or(ilike(users.name, `%${search}%`), ilike(users.email, `%${search}%`))
+        or(
+          ilike(users.name, `%${escapeLike(search)}%`),
+          ilike(users.email, `%${escapeLike(search)}%`)
+        )
       );
     }
 
