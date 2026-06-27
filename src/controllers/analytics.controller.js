@@ -1,4 +1,6 @@
+import { z } from 'zod';
 import logger from '#config/logger.js';
+import { formatValidationError } from '#utils/format.js';
 import {
   getSummary,
   getSpendByDepartment,
@@ -6,15 +8,19 @@ import {
   getBudgetUtilization,
 } from '#services/analytics.service.js';
 
+const budgetUtilizationQuerySchema = z.object({
+  fiscal_year: z.coerce.number().int().positive().optional(),
+});
+
 export const fetchSummary = async (req, res, next) => {
   try {
     logger.info('Getting procurement summary...');
 
-    const summary = await getSummary();
+    const data = await getSummary();
 
     res.status(200).json({
       message: 'Successfully retrieved summary',
-      summary,
+      data,
     });
   } catch (error) {
     logger.error('Error fetching summary', error);
@@ -58,9 +64,16 @@ export const fetchSpendByVendor = async (req, res, next) => {
 
 export const fetchBudgetUtilization = async (req, res, next) => {
   try {
-    const fiscalYear = req.query.fiscal_year
-      ? parseInt(req.query.fiscal_year, 10)
-      : undefined;
+    const parsed = budgetUtilizationQuerySchema.safeParse(req.query);
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: formatValidationError(parsed.error),
+      });
+    }
+
+    const fiscalYear = parsed.data.fiscal_year;
 
     logger.info('Getting budget utilization...');
 
