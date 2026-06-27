@@ -23,6 +23,7 @@ import {
   rejectRequisitionSchema,
 } from '#validations/requisitions.validation.js';
 import { formatValidationError } from '#utils/format.js';
+import { logAudit } from '#services/audit_logs.service.js';
 
 const FILTER_CONFIG = {
   status: { type: 'string', operators: ['eq'] },
@@ -146,6 +147,11 @@ export const createNewRequisition = async (req, res, next) => {
       req.user.id
     );
 
+    logAudit(req.user.id, 'CREATE', 'requisition', requisition.id, {
+      title: requisition.title,
+      estimated_cost: requisition.estimated_cost,
+    });
+
     res.status(201).json({
       message: 'Requisition created successfully',
       requisition,
@@ -240,6 +246,8 @@ export const approveRequisitionById = async (req, res, next) => {
 
     const requisition = await approveRequisition(id, req.user.id, notes);
 
+    logAudit(req.user.id, 'APPROVE', 'requisition', id, { notes });
+
     res.status(200).json({
       message: 'Requisition approved successfully',
       requisition,
@@ -292,6 +300,8 @@ export const rejectRequisitionById = async (req, res, next) => {
 
     const requisition = await rejectRequisition(id, req.user.id, notes);
 
+    logAudit(req.user.id, 'REJECT', 'requisition', id, { notes });
+
     res.status(200).json({
       message: 'Requisition rejected successfully',
       requisition,
@@ -329,6 +339,10 @@ export const deleteRequisitionById = async (req, res, next) => {
     logger.info(`Deleting requisition ${id}...`);
 
     const requisition = await deleteRequisition(id);
+
+    logAudit(req.user.id, 'DELETE', 'requisition', id, {
+      title: requisition.title,
+    });
 
     res.status(200).json({
       message: 'Requisition deleted successfully',

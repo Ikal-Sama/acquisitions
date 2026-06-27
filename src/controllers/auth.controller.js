@@ -4,6 +4,7 @@ import { formatValidationError } from '#utils/format.js';
 import { signupSchema, signInSchema } from '#validations/auth.validation.js';
 import { jwttoken } from '#utils/jwt.js';
 import { cookies } from '#utils/cookies.js';
+import { logAudit } from '#services/audit_logs.service.js';
 
 export const signup = async (req, res, next) => {
   try {
@@ -27,6 +28,8 @@ export const signup = async (req, res, next) => {
     });
 
     cookies.set(res, 'token', token);
+
+    logAudit(user.id, 'REGISTER', 'user', user.id, { email });
 
     logger.info(`User registered successfully: ${email}`);
     res.status(201).json({

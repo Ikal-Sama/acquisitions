@@ -29,6 +29,7 @@ import {
   poItemIdSchema,
 } from '#validations/purchase_orders.validation.js';
 import { formatValidationError } from '#utils/format.js';
+import { logAudit } from '#services/audit_logs.service.js';
 
 const FILTER_CONFIG = {
   status: { type: 'string', operators: ['eq'] },
@@ -131,6 +132,11 @@ export const createNewPurchaseOrder = async (req, res, next) => {
 
     const po = await createPurchaseOrder(validationResult.data, req.user.id);
 
+    logAudit(req.user.id, 'CREATE', 'purchase_order', po.id, {
+      po_number: po.po_number,
+      total_amount: po.total_amount,
+    });
+
     res.status(201).json({
       message: 'Purchase order created successfully',
       purchase_order: po,
@@ -203,6 +209,10 @@ export const sendPurchaseOrderById = async (req, res, next) => {
 
     const po = await sendPurchaseOrder(id);
 
+    logAudit(req.user.id, 'SEND', 'purchase_order', id, {
+      po_number: po.po_number,
+    });
+
     res.status(200).json({
       message: 'Purchase order sent to vendor',
       purchase_order: po,
@@ -237,6 +247,10 @@ export const receivePurchaseOrderById = async (req, res, next) => {
     logger.info(`Receiving purchase order ${id}...`);
 
     const po = await receivePurchaseOrder(id);
+
+    logAudit(req.user.id, 'RECEIVE', 'purchase_order', id, {
+      po_number: po.po_number,
+    });
 
     res.status(200).json({
       message: 'Purchase order marked as received',
@@ -277,6 +291,10 @@ export const cancelPurchaseOrderById = async (req, res, next) => {
 
     const po = await cancelPurchaseOrder(id);
 
+    logAudit(req.user.id, 'CANCEL', 'purchase_order', id, {
+      po_number: po.po_number,
+    });
+
     res.status(200).json({
       message: 'Purchase order cancelled',
       purchase_order: po,
@@ -314,6 +332,10 @@ export const deletePurchaseOrderById = async (req, res, next) => {
     logger.info(`Deleting purchase order ${id}...`);
 
     const po = await deletePurchaseOrder(id);
+
+    logAudit(req.user.id, 'DELETE', 'purchase_order', id, {
+      po_number: po.po_number,
+    });
 
     res.status(200).json({
       message: 'Purchase order deleted successfully',
