@@ -13,6 +13,7 @@ import assetsRoutes from '#routes/assets.route.js';
 import departmentsRoutes from '#routes/departments.route.js';
 import budgetsRoutes from '#routes/budgets.route.js';
 import analyticsRoutes from '#routes/analytics.route.js';
+import auditLogsRoutes from '#routes/audit_logs.route.js';
 import securityMiddleware from '#middleware/security.middleware.js';
 
 const app = express();
@@ -60,6 +61,7 @@ app.use('/api/assets', assetsRoutes);
 app.use('/api/departments', departmentsRoutes);
 app.use('/api/budgets', budgetsRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/audit-logs', auditLogsRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Route Not found!' });

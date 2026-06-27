@@ -43,6 +43,13 @@
       "when": 1782400000000,
       "tag": "0005_departments_budgets",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782558342310,
+      "tag": "0006_rainy_ravenous",
+      "breakpoints": true
     }
   ]
 }
