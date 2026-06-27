@@ -251,6 +251,7 @@ Checklist before declaring work done:
 5. No secrets in code, logs, or responses.
 6. Error paths return structured JSON, not raw stack traces.
 7. Validation runs at the controller boundary for any new endpoint.
+8. `npm test` — all tests pass.
 
 ---
 
@@ -265,8 +266,9 @@ Checklist before declaring work done:
 ### Before pushing
 
 1. Run `npm run lint` and `npm run format:check` — must pass.
-2. Run `coderabbit doctor` to verify the CLI is ready.
-3. Commit with a clear, concise message (present tense, no period).
+2. Run `npm test` — all tests pass.
+3. Run `coderabbit doctor` to verify the CLI is ready.
+4. Commit with a clear, concise message (present tense, no period).
 
 ### Creating a PR
 
