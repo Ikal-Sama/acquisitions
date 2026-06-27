@@ -1,4 +1,4 @@
-import { eq, and, ilike, or, sql } from 'drizzle-orm';
+import { eq, and, ilike, or, sql, asc, desc } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { users } from '#models/user.model.js';
@@ -14,7 +14,7 @@ const PUBLIC_USER_COLUMNS = {
   updated_at: users.updated_at,
 };
 
-export const getAllUsers = async (pagination = {}, search = '') => {
+export const getAllUsers = async (pagination = {}, search = '', sort = []) => {
   try {
     const { limit, offset } = pagination;
 
@@ -36,10 +36,18 @@ export const getAllUsers = async (pagination = {}, search = '') => {
       .from(users)
       .where(where);
 
+    const orderBy =
+      sort.length > 0
+        ? sort.map(s =>
+            s.direction === 'desc' ? desc(users[s.field]) : asc(users[s.field])
+          )
+        : [desc(users.created_at)];
+
     const data = await db
       .select(PUBLIC_USER_COLUMNS)
       .from(users)
       .where(where)
+      .orderBy(...orderBy)
       .limit(limit)
       .offset(offset);
 

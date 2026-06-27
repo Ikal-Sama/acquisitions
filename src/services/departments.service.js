@@ -1,10 +1,14 @@
-import { eq, ilike, or, and, asc, sql } from 'drizzle-orm';
+import { eq, ilike, or, and, asc, desc, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { departments } from '#models/department.model.js';
 import { escapeLike } from '#utils/format.js';
 
-export const getAllDepartments = async (pagination = {}, search = '') => {
+export const getAllDepartments = async (
+  pagination = {},
+  search = '',
+  sort = []
+) => {
   try {
     const { limit, offset } = pagination;
 
@@ -27,11 +31,20 @@ export const getAllDepartments = async (pagination = {}, search = '') => {
       .from(departments)
       .where(where);
 
+    const orderBy =
+      sort.length > 0
+        ? sort.map(s =>
+            s.direction === 'desc'
+              ? desc(departments[s.field])
+              : asc(departments[s.field])
+          )
+        : [asc(departments.name)];
+
     const data = await db
       .select()
       .from(departments)
       .where(where)
-      .orderBy(asc(departments.name))
+      .orderBy(...orderBy)
       .limit(limit)
       .offset(offset);
 

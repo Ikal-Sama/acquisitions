@@ -1,5 +1,9 @@
 import logger from '#config/logger.js';
-import { parsePagination, paginationMeta } from '#utils/pagination.js';
+import {
+  parsePagination,
+  paginationMeta,
+  parseSort,
+} from '#utils/pagination.js';
 import {
   getAllBudgets,
   getBudgetById,
@@ -27,10 +31,16 @@ export const fetchAllBudgets = async (req, res, next) => {
     }
 
     const pagination = parsePagination(req.query);
+    const sort = parseSort(req.query, [
+      'fiscal_year',
+      'allocated_amount',
+      'spent_amount',
+      'created_at',
+    ]);
 
     logger.info('Getting budgets...');
 
-    const { data, total } = await getAllBudgets(filters, pagination);
+    const { data, total } = await getAllBudgets(filters, pagination, sort);
 
     res.status(200).json({
       message: 'Successfully retrieved budgets',

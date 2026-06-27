@@ -1,5 +1,9 @@
 import logger from '#config/logger.js';
-import { parsePagination, paginationMeta } from '#utils/pagination.js';
+import {
+  parsePagination,
+  paginationMeta,
+  parseSort,
+} from '#utils/pagination.js';
 import {
   getAllDepartments,
   getDepartmentById,
@@ -20,8 +24,9 @@ export const fetchAllDepartments = async (req, res, next) => {
 
     const pagination = parsePagination(req.query);
     const search = req.query.search || '';
+    const sort = parseSort(req.query, ['name', 'code', 'created_at']);
 
-    const { data, total } = await getAllDepartments(pagination, search);
+    const { data, total } = await getAllDepartments(pagination, search, sort);
 
     res.status(200).json({
       message: 'Successfully retrieved departments',

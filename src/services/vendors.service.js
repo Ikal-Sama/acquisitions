@@ -1,10 +1,14 @@
-import { eq, ilike, or, and, sql } from 'drizzle-orm';
+import { eq, ilike, or, and, sql, asc, desc } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { vendors } from '#models/vendor.model.js';
 import { escapeLike } from '#utils/format.js';
 
-export const getAllVendors = async (pagination = {}, search = '') => {
+export const getAllVendors = async (
+  pagination = {},
+  search = '',
+  sort = []
+) => {
   try {
     const { limit, offset } = pagination;
 
@@ -26,10 +30,20 @@ export const getAllVendors = async (pagination = {}, search = '') => {
       .from(vendors)
       .where(where);
 
+    const orderBy =
+      sort.length > 0
+        ? sort.map(s =>
+            s.direction === 'desc'
+              ? desc(vendors[s.field])
+              : asc(vendors[s.field])
+          )
+        : [asc(vendors.name)];
+
     const data = await db
       .select()
       .from(vendors)
       .where(where)
+      .orderBy(...orderBy)
       .limit(limit)
       .offset(offset);
 
