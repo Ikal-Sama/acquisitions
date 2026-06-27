@@ -1,10 +1,39 @@
-import { eq, ilike, or, and, sql, asc, desc } from 'drizzle-orm';
+import {
+  eq,
+  and,
+  ilike,
+  or,
+  sql,
+  asc,
+  desc,
+  gte,
+  lte,
+  gt,
+  lt,
+} from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { vendors } from '#models/vendor.model.js';
 import { escapeLike } from '#utils/format.js';
 
+const applyFilters = (model, filters) =>
+  filters.map(f => {
+    switch (f.operator) {
+      case 'eq':
+        return eq(model[f.field], f.value);
+      case 'gte':
+        return gte(model[f.field], f.value);
+      case 'lte':
+        return lte(model[f.field], f.value);
+      case 'gt':
+        return gt(model[f.field], f.value);
+      case 'lt':
+        return lt(model[f.field], f.value);
+    }
+  });
+
 export const getAllVendors = async (
+  filters = [],
   pagination = {},
   search = '',
   sort = [],
@@ -13,7 +42,7 @@ export const getAllVendors = async (
   try {
     const { limit, offset } = pagination;
 
-    const conditions = [];
+    const conditions = [...applyFilters(vendors, filters)];
 
     if (search) {
       conditions.push(

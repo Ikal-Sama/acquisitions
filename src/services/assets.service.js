@@ -1,8 +1,36 @@
-import { eq, and, asc, desc, ilike, or, sql } from 'drizzle-orm';
+import {
+  eq,
+  and,
+  asc,
+  desc,
+  ilike,
+  or,
+  sql,
+  gte,
+  lte,
+  gt,
+  lt,
+} from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { assets } from '#models/asset.model.js';
 import { escapeLike } from '#utils/format.js';
+
+const applyFilters = (model, filters) =>
+  filters.map(f => {
+    switch (f.operator) {
+      case 'eq':
+        return eq(model[f.field], f.value);
+      case 'gte':
+        return gte(model[f.field], f.value);
+      case 'lte':
+        return lte(model[f.field], f.value);
+      case 'gt':
+        return gt(model[f.field], f.value);
+      case 'lt':
+        return lt(model[f.field], f.value);
+    }
+  });
 
 const generateAssetTag = async () => {
   const year = new Date().getFullYear();
@@ -24,7 +52,7 @@ const generateAssetTag = async () => {
 };
 
 export const getAllAssets = async (
-  filters = {},
+  filters = [],
   pagination = {},
   search = '',
   sort = [],
@@ -33,19 +61,7 @@ export const getAllAssets = async (
   try {
     const { limit, offset } = pagination;
 
-    const conditions = [];
-
-    if (filters.status) {
-      conditions.push(eq(assets.status, filters.status));
-    }
-
-    if (filters.assigned_to) {
-      conditions.push(eq(assets.assigned_to, filters.assigned_to));
-    }
-
-    if (filters.purchase_order_id) {
-      conditions.push(eq(assets.purchase_order_id, filters.purchase_order_id));
-    }
+    const conditions = [...applyFilters(assets, filters)];
 
     if (search) {
       conditions.push(

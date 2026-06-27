@@ -1,4 +1,16 @@
-import { eq, and, ilike, or, sql, asc, desc } from 'drizzle-orm';
+import {
+  eq,
+  and,
+  ilike,
+  or,
+  sql,
+  asc,
+  desc,
+  gte,
+  lte,
+  gt,
+  lt,
+} from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { users } from '#models/user.model.js';
@@ -14,7 +26,24 @@ const PUBLIC_USER_COLUMNS = {
   updated_at: users.updated_at,
 };
 
+const applyFilters = (model, filters) =>
+  filters.map(f => {
+    switch (f.operator) {
+      case 'eq':
+        return eq(model[f.field], f.value);
+      case 'gte':
+        return gte(model[f.field], f.value);
+      case 'lte':
+        return lte(model[f.field], f.value);
+      case 'gt':
+        return gt(model[f.field], f.value);
+      case 'lt':
+        return lt(model[f.field], f.value);
+    }
+  });
+
 export const getAllUsers = async (
+  filters = [],
   pagination = {},
   search = '',
   sort = [],
@@ -23,7 +52,7 @@ export const getAllUsers = async (
   try {
     const { limit, offset } = pagination;
 
-    const conditions = [];
+    const conditions = [...applyFilters(users, filters)];
 
     if (search) {
       conditions.push(

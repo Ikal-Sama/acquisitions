@@ -4,6 +4,7 @@ import {
   paginationMeta,
   parseSort,
   parseFields,
+  parseFilters,
 } from '#utils/pagination.js';
 import {
   getAllBudgets,
@@ -20,17 +21,21 @@ import {
 } from '#validations/budgets.validation.js';
 import { formatValidationError } from '#utils/format.js';
 
+const FILTER_CONFIG = {
+  fiscal_year: { type: 'integer', operators: ['eq', 'gte', 'lte', 'gt', 'lt'] },
+  department_id: { type: 'integer', operators: ['eq'] },
+  allocated_amount: {
+    type: 'number',
+    operators: ['eq', 'gte', 'lte', 'gt', 'lt'],
+  },
+  spent_amount: { type: 'number', operators: ['eq', 'gte', 'lte', 'gt', 'lt'] },
+  created_at: { type: 'date', operators: ['gte', 'lte', 'gt', 'lt'] },
+  updated_at: { type: 'date', operators: ['gte', 'lte', 'gt', 'lt'] },
+};
+
 export const fetchAllBudgets = async (req, res, next) => {
   try {
-    const filters = {};
-
-    if (req.query.department_id) {
-      filters.department_id = req.query.department_id;
-    }
-    if (req.query.fiscal_year) {
-      filters.fiscal_year = req.query.fiscal_year;
-    }
-
+    const filters = parseFilters(req.query, FILTER_CONFIG);
     const pagination = parsePagination(req.query);
     const sort = parseSort(req.query, [
       'fiscal_year',
@@ -51,6 +56,7 @@ export const fetchAllBudgets = async (req, res, next) => {
     const { data, total } = await getAllBudgets(
       filters,
       pagination,
+      '',
       sort,
       fields
     );

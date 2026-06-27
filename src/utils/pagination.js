@@ -48,3 +48,47 @@ export const parseFields = (query, allowedFields = []) => {
     .map(f => f.trim())
     .filter(f => f && allowedFields.includes(f));
 };
+
+const filterValue = (raw, type) => {
+  if (type === 'number') {
+    const v = Number(raw);
+    return isNaN(v) ? undefined : v;
+  }
+  if (type === 'integer') {
+    const v = parseInt(raw, 10);
+    return isNaN(v) ? undefined : v;
+  }
+  if (type === 'date') {
+    const v = new Date(raw);
+    return isNaN(v.getTime()) ? undefined : v;
+  }
+  return raw;
+};
+
+export const parseFilters = (query, filterConfig = {}) => {
+  const filters = [];
+
+  for (const [key, rawValue] of Object.entries(query)) {
+    const dotIndex = key.lastIndexOf('.');
+    let field;
+    let operator;
+
+    if (dotIndex > 0 && dotIndex < key.length - 1) {
+      field = key.slice(0, dotIndex);
+      operator = key.slice(dotIndex + 1);
+    } else {
+      field = key;
+      operator = 'eq';
+    }
+
+    const config = filterConfig[field];
+    if (!config || !config.operators.includes(operator)) continue;
+
+    const value = filterValue(rawValue, config.type);
+    if (value === undefined) continue;
+
+    filters.push({ field, operator, value });
+  }
+
+  return filters;
+};

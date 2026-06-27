@@ -4,6 +4,7 @@ import {
   paginationMeta,
   parseSort,
   parseFields,
+  parseFilters,
 } from '#utils/pagination.js';
 import {
   getAllAssets,
@@ -22,16 +23,23 @@ import {
 } from '#validations/assets.validation.js';
 import { formatValidationError } from '#utils/format.js';
 
+const FILTER_CONFIG = {
+  status: { type: 'string', operators: ['eq'] },
+  assigned_to: { type: 'integer', operators: ['eq'] },
+  purchase_order_id: { type: 'integer', operators: ['eq'] },
+  purchase_price: {
+    type: 'number',
+    operators: ['eq', 'gte', 'lte', 'gt', 'lt'],
+  },
+  location: { type: 'string', operators: ['eq'] },
+  warranty_expiry: { type: 'date', operators: ['gte', 'lte', 'gt', 'lt'] },
+  created_at: { type: 'date', operators: ['gte', 'lte', 'gt', 'lt'] },
+  updated_at: { type: 'date', operators: ['gte', 'lte', 'gt', 'lt'] },
+};
+
 export const fetchAllAssets = async (req, res, next) => {
   try {
-    const filters = {};
-
-    if (req.query.status) filters.status = req.query.status;
-    if (req.query.assigned_to) filters.assigned_to = req.query.assigned_to;
-    if (req.query.purchase_order_id) {
-      filters.purchase_order_id = req.query.purchase_order_id;
-    }
-
+    const filters = parseFilters(req.query, FILTER_CONFIG);
     const pagination = parsePagination(req.query);
     const search = req.query.search || '';
     const sort = parseSort(req.query, [
