@@ -27,7 +27,8 @@ export const getAllAssets = async (
   filters = {},
   pagination = {},
   search = '',
-  sort = []
+  sort = [],
+  fields = []
 ) => {
   try {
     const { limit, offset } = pagination;
@@ -63,18 +64,27 @@ export const getAllAssets = async (
       .from(assets)
       .where(where);
 
-    const orderBy =
-      sort.length > 0
-        ? sort.map(s =>
-            s.direction === 'desc'
-              ? desc(assets[s.field])
-              : asc(assets[s.field])
-          )
-        : [desc(assets.created_at)];
+    let orderBy;
 
-    const data = await db
-      .select()
-      .from(assets)
+    if (sort.length > 0) {
+      orderBy = sort.map(s =>
+        s.direction === 'desc' ? desc(assets[s.field]) : asc(assets[s.field])
+      );
+    } else {
+      orderBy = [desc(assets.created_at)];
+    }
+
+    let queryBuilder;
+
+    if (fields.length > 0) {
+      queryBuilder = db
+        .select(Object.fromEntries(fields.map(f => [f, assets[f]])))
+        .from(assets);
+    } else {
+      queryBuilder = db.select().from(assets);
+    }
+
+    const data = await queryBuilder
       .where(where)
       .orderBy(...orderBy)
       .limit(limit)

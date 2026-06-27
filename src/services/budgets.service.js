@@ -6,7 +6,8 @@ import { budgets } from '#models/budget.model.js';
 export const getAllBudgets = async (
   filters = {},
   pagination = {},
-  sort = []
+  sort = [],
+  fields = []
 ) => {
   try {
     const { limit, offset } = pagination;
@@ -28,18 +29,27 @@ export const getAllBudgets = async (
       .from(budgets)
       .where(where);
 
-    const orderBy =
-      sort.length > 0
-        ? sort.map(s =>
-            s.direction === 'desc'
-              ? desc(budgets[s.field])
-              : asc(budgets[s.field])
-          )
-        : [desc(budgets.fiscal_year)];
+    let orderBy;
 
-    const data = await db
-      .select()
-      .from(budgets)
+    if (sort.length > 0) {
+      orderBy = sort.map(s =>
+        s.direction === 'desc' ? desc(budgets[s.field]) : asc(budgets[s.field])
+      );
+    } else {
+      orderBy = [desc(budgets.fiscal_year)];
+    }
+
+    let queryBuilder;
+
+    if (fields.length > 0) {
+      queryBuilder = db
+        .select(Object.fromEntries(fields.map(f => [f, budgets[f]])))
+        .from(budgets);
+    } else {
+      queryBuilder = db.select().from(budgets);
+    }
+
+    const data = await queryBuilder
       .where(where)
       .orderBy(...orderBy)
       .limit(limit)

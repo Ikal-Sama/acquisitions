@@ -14,7 +14,12 @@ const PUBLIC_USER_COLUMNS = {
   updated_at: users.updated_at,
 };
 
-export const getAllUsers = async (pagination = {}, search = '', sort = []) => {
+export const getAllUsers = async (
+  pagination = {},
+  search = '',
+  sort = [],
+  fields = []
+) => {
   try {
     const { limit, offset } = pagination;
 
@@ -36,15 +41,23 @@ export const getAllUsers = async (pagination = {}, search = '', sort = []) => {
       .from(users)
       .where(where);
 
-    const orderBy =
-      sort.length > 0
-        ? sort.map(s =>
-            s.direction === 'desc' ? desc(users[s.field]) : asc(users[s.field])
-          )
-        : [desc(users.created_at)];
+    let orderBy;
+
+    if (sort.length > 0) {
+      orderBy = sort.map(s =>
+        s.direction === 'desc' ? desc(users[s.field]) : asc(users[s.field])
+      );
+    } else {
+      orderBy = [desc(users.created_at)];
+    }
+
+    const select =
+      fields.length > 0
+        ? Object.fromEntries(fields.map(f => [f, users[f]]))
+        : PUBLIC_USER_COLUMNS;
 
     const data = await db
-      .select(PUBLIC_USER_COLUMNS)
+      .select(select)
       .from(users)
       .where(where)
       .orderBy(...orderBy)

@@ -7,7 +7,8 @@ import { escapeLike } from '#utils/format.js';
 export const getAllDepartments = async (
   pagination = {},
   search = '',
-  sort = []
+  sort = [],
+  fields = []
 ) => {
   try {
     const { limit, offset } = pagination;
@@ -31,18 +32,29 @@ export const getAllDepartments = async (
       .from(departments)
       .where(where);
 
-    const orderBy =
-      sort.length > 0
-        ? sort.map(s =>
-            s.direction === 'desc'
-              ? desc(departments[s.field])
-              : asc(departments[s.field])
-          )
-        : [asc(departments.name)];
+    let orderBy;
 
-    const data = await db
-      .select()
-      .from(departments)
+    if (sort.length > 0) {
+      orderBy = sort.map(s =>
+        s.direction === 'desc'
+          ? desc(departments[s.field])
+          : asc(departments[s.field])
+      );
+    } else {
+      orderBy = [asc(departments.name)];
+    }
+
+    let queryBuilder;
+
+    if (fields.length > 0) {
+      queryBuilder = db
+        .select(Object.fromEntries(fields.map(f => [f, departments[f]])))
+        .from(departments);
+    } else {
+      queryBuilder = db.select().from(departments);
+    }
+
+    const data = await queryBuilder
       .where(where)
       .orderBy(...orderBy)
       .limit(limit)
