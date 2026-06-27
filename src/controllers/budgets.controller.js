@@ -3,6 +3,7 @@ import {
   parsePagination,
   paginationMeta,
   parseSort,
+  parseFields,
 } from '#utils/pagination.js';
 import {
   getAllBudgets,
@@ -37,10 +38,22 @@ export const fetchAllBudgets = async (req, res, next) => {
       'spent_amount',
       'created_at',
     ]);
+    const fields = parseFields(req.query, [
+      'fiscal_year',
+      'allocated_amount',
+      'spent_amount',
+      'created_at',
+      'department_id',
+    ]);
 
     logger.info('Getting budgets...');
 
-    const { data, total } = await getAllBudgets(filters, pagination, sort);
+    const { data, total } = await getAllBudgets(
+      filters,
+      pagination,
+      sort,
+      fields
+    );
 
     res.status(200).json({
       message: 'Successfully retrieved budgets',

@@ -3,6 +3,7 @@ import {
   parsePagination,
   paginationMeta,
   parseSort,
+  parseFields,
 } from '#utils/pagination.js';
 import {
   getAllDepartments,
@@ -25,8 +26,19 @@ export const fetchAllDepartments = async (req, res, next) => {
     const pagination = parsePagination(req.query);
     const search = req.query.search || '';
     const sort = parseSort(req.query, ['name', 'code', 'created_at']);
+    const fields = parseFields(req.query, [
+      'name',
+      'code',
+      'description',
+      'created_at',
+    ]);
 
-    const { data, total } = await getAllDepartments(pagination, search, sort);
+    const { data, total } = await getAllDepartments(
+      pagination,
+      search,
+      sort,
+      fields
+    );
 
     res.status(200).json({
       message: 'Successfully retrieved departments',

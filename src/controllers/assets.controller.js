@@ -3,6 +3,7 @@ import {
   parsePagination,
   paginationMeta,
   parseSort,
+  parseFields,
 } from '#utils/pagination.js';
 import {
   getAllAssets,
@@ -39,6 +40,13 @@ export const fetchAllAssets = async (req, res, next) => {
       'status',
       'created_at',
     ]);
+    const fields = parseFields(req.query, [
+      'name',
+      'asset_tag',
+      'serial_number',
+      'status',
+      'created_at',
+    ]);
 
     logger.info('Getting assets...');
 
@@ -46,7 +54,8 @@ export const fetchAllAssets = async (req, res, next) => {
       filters,
       pagination,
       search,
-      sort
+      sort,
+      fields
     );
 
     res.status(200).json({

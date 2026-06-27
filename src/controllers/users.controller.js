@@ -3,6 +3,7 @@ import {
   parsePagination,
   paginationMeta,
   parseSort,
+  parseFields,
 } from '#utils/pagination.js';
 import {
   getAllUsers,
@@ -23,8 +24,14 @@ export const fetchAllUsers = async (req, res, next) => {
     const pagination = parsePagination(req.query);
     const search = req.query.search || '';
     const sort = parseSort(req.query, ['name', 'email', 'role', 'created_at']);
+    const fields = parseFields(req.query, [
+      'name',
+      'email',
+      'role',
+      'created_at',
+    ]);
 
-    const { data, total } = await getAllUsers(pagination, search, sort);
+    const { data, total } = await getAllUsers(pagination, search, sort, fields);
 
     res.status(200).json({
       message: 'Successfully retrieved users',

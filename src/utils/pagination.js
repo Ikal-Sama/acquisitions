@@ -39,3 +39,12 @@ export const parseSort = (query, allowedFields = []) => {
 
   return sortFields;
 };
+
+export const parseFields = (query, allowedFields = []) => {
+  if (!query.fields) return [];
+
+  return query.fields
+    .split(',')
+    .map(f => f.trim())
+    .filter(f => f && allowedFields.includes(f));
+};

@@ -3,6 +3,7 @@ import {
   parsePagination,
   paginationMeta,
   parseSort,
+  parseFields,
 } from '#utils/pagination.js';
 import {
   getAllRequisitions,
@@ -43,6 +44,15 @@ export const fetchAllRequisitions = async (req, res, next) => {
       'estimated_cost',
       'created_at',
     ]);
+    const fields = parseFields(req.query, [
+      'title',
+      'description',
+      'status',
+      'estimated_cost',
+      'department_id',
+      'requested_by',
+      'created_at',
+    ]);
 
     logger.info('Getting requisitions...');
 
@@ -50,7 +60,8 @@ export const fetchAllRequisitions = async (req, res, next) => {
       filters,
       pagination,
       search,
-      sort
+      sort,
+      fields
     );
 
     res.status(200).json({

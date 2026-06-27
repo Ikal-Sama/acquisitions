@@ -3,6 +3,7 @@ import {
   parsePagination,
   paginationMeta,
   parseSort,
+  parseFields,
 } from '#utils/pagination.js';
 import {
   getAllPurchaseOrders,
@@ -43,6 +44,13 @@ export const fetchAllPurchaseOrders = async (req, res, next) => {
       'total_amount',
       'created_at',
     ]);
+    const fields = parseFields(req.query, [
+      'po_number',
+      'status',
+      'total_amount',
+      'vendor_id',
+      'created_at',
+    ]);
 
     logger.info('Getting purchase orders...');
 
@@ -50,7 +58,8 @@ export const fetchAllPurchaseOrders = async (req, res, next) => {
       filters,
       pagination,
       search,
-      sort
+      sort,
+      fields
     );
 
     res.status(200).json({

@@ -49,7 +49,8 @@ export const getAllPurchaseOrders = async (
   filters = {},
   pagination = {},
   search = '',
-  sort = []
+  sort = [],
+  fields = []
 ) => {
   try {
     const { limit, offset } = pagination;
@@ -80,18 +81,29 @@ export const getAllPurchaseOrders = async (
       .from(purchaseOrders)
       .where(where);
 
-    const orderBy =
-      sort.length > 0
-        ? sort.map(s =>
-            s.direction === 'desc'
-              ? desc(purchaseOrders[s.field])
-              : asc(purchaseOrders[s.field])
-          )
-        : [desc(purchaseOrders.created_at)];
+    let orderBy;
 
-    const data = await db
-      .select()
-      .from(purchaseOrders)
+    if (sort.length > 0) {
+      orderBy = sort.map(s =>
+        s.direction === 'desc'
+          ? desc(purchaseOrders[s.field])
+          : asc(purchaseOrders[s.field])
+      );
+    } else {
+      orderBy = [desc(purchaseOrders.created_at)];
+    }
+
+    let queryBuilder;
+
+    if (fields.length > 0) {
+      queryBuilder = db
+        .select(Object.fromEntries(fields.map(f => [f, purchaseOrders[f]])))
+        .from(purchaseOrders);
+    } else {
+      queryBuilder = db.select().from(purchaseOrders);
+    }
+
+    const data = await queryBuilder
       .where(where)
       .orderBy(...orderBy)
       .limit(limit)
