@@ -1,4 +1,5 @@
 import logger from '#config/logger.js';
+import { parsePagination, paginationMeta } from '#utils/pagination.js';
 import {
   getAllRequisitions,
   getRequisitionById,
@@ -30,14 +31,22 @@ export const fetchAllRequisitions = async (req, res, next) => {
       filters.requested_by = req.user.id;
     }
 
+    const pagination = parsePagination(req.query);
+    const search = req.query.search || '';
+
     logger.info('Getting requisitions...');
 
-    const allRequisitions = await getAllRequisitions(filters);
+    const { data, total } = await getAllRequisitions(
+      filters,
+      pagination,
+      search
+    );
 
     res.status(200).json({
       message: 'Successfully retrieved requisitions',
-      requisitions: allRequisitions,
-      count: allRequisitions.length,
+      requisitions: data,
+      count: data.length,
+      pagination: paginationMeta(pagination.page, pagination.limit, total),
     });
   } catch (error) {
     logger.error('Error fetching requisitions', error);

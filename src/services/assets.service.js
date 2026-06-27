@@ -1,4 +1,4 @@
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, ilike, or, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { assets } from '#models/asset.model.js';
@@ -22,8 +22,14 @@ const generateAssetTag = async () => {
   return `AST-${year}-${String(nextSeq).padStart(4, '0')}`;
 };
 
-export const getAllAssets = async (filters = {}) => {
+export const getAllAssets = async (
+  filters = {},
+  pagination = {},
+  search = ''
+) => {
   try {
+    const { limit, offset } = pagination;
+
     const conditions = [];
 
     if (filters.status) {
@@ -38,13 +44,32 @@ export const getAllAssets = async (filters = {}) => {
       conditions.push(eq(assets.purchase_order_id, filters.purchase_order_id));
     }
 
+    if (search) {
+      conditions.push(
+        or(
+          ilike(assets.name, `%${search}%`),
+          ilike(assets.asset_tag, `%${search}%`),
+          ilike(assets.serial_number, `%${search}%`)
+        )
+      );
+    }
+
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-    return await db
+    const [{ count: total }] = await db
+      .select({ count: sql`count(*)` })
+      .from(assets)
+      .where(where);
+
+    const data = await db
       .select()
       .from(assets)
       .where(where)
-      .orderBy(desc(assets.created_at));
+      .orderBy(desc(assets.created_at))
+      .limit(limit)
+      .offset(offset);
+
+    return { data, total: Number(total) };
   } catch (e) {
     logger.error('Error getting assets', e);
     throw e;

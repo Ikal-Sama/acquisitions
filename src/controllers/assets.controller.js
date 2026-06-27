@@ -1,4 +1,5 @@
 import logger from '#config/logger.js';
+import { parsePagination, paginationMeta } from '#utils/pagination.js';
 import {
   getAllAssets,
   getAssetById,
@@ -26,14 +27,18 @@ export const fetchAllAssets = async (req, res, next) => {
       filters.purchase_order_id = req.query.purchase_order_id;
     }
 
+    const pagination = parsePagination(req.query);
+    const search = req.query.search || '';
+
     logger.info('Getting assets...');
 
-    const allAssets = await getAllAssets(filters);
+    const { data, total } = await getAllAssets(filters, pagination, search);
 
     res.status(200).json({
       message: 'Successfully retrieved assets',
-      assets: allAssets,
-      count: allAssets.length,
+      assets: data,
+      count: data.length,
+      pagination: paginationMeta(pagination.page, pagination.limit, total),
     });
   } catch (error) {
     logger.error('Error fetching assets', error);

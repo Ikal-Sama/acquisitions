@@ -1,11 +1,38 @@
-import { eq } from 'drizzle-orm';
+import { eq, ilike, or, and, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { vendors } from '#models/vendor.model.js';
 
-export const getAllVendors = async () => {
+export const getAllVendors = async (pagination = {}, search = '') => {
   try {
-    return await db.select().from(vendors);
+    const { limit, offset } = pagination;
+
+    const conditions = [];
+
+    if (search) {
+      conditions.push(
+        or(
+          ilike(vendors.name, `%${search}%`),
+          ilike(vendors.email, `%${search}%`)
+        )
+      );
+    }
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const [{ count: total }] = await db
+      .select({ count: sql`count(*)` })
+      .from(vendors)
+      .where(where);
+
+    const data = await db
+      .select()
+      .from(vendors)
+      .where(where)
+      .limit(limit)
+      .offset(offset);
+
+    return { data, total: Number(total) };
   } catch (e) {
     logger.error('Error getting vendors', e);
     throw e;

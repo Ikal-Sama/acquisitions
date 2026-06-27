@@ -1,11 +1,40 @@
-import { eq, asc } from 'drizzle-orm';
+import { eq, ilike, or, and, asc, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { departments } from '#models/department.model.js';
 
-export const getAllDepartments = async () => {
+export const getAllDepartments = async (pagination = {}, search = '') => {
   try {
-    return await db.select().from(departments).orderBy(asc(departments.name));
+    const { limit, offset } = pagination;
+
+    const conditions = [];
+
+    if (search) {
+      conditions.push(
+        or(
+          ilike(departments.name, `%${search}%`),
+          ilike(departments.code, `%${search}%`),
+          ilike(departments.description, `%${search}%`)
+        )
+      );
+    }
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const [{ count: total }] = await db
+      .select({ count: sql`count(*)` })
+      .from(departments)
+      .where(where);
+
+    const data = await db
+      .select()
+      .from(departments)
+      .where(where)
+      .orderBy(asc(departments.name))
+      .limit(limit)
+      .offset(offset);
+
+    return { data, total: Number(total) };
   } catch (e) {
     logger.error('Error getting departments', e);
     throw e;

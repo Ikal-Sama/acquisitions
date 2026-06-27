@@ -1,4 +1,5 @@
 import logger from '#config/logger.js';
+import { parsePagination, paginationMeta } from '#utils/pagination.js';
 import {
   getAllBudgets,
   getBudgetById,
@@ -25,14 +26,17 @@ export const fetchAllBudgets = async (req, res, next) => {
       filters.fiscal_year = req.query.fiscal_year;
     }
 
+    const pagination = parsePagination(req.query);
+
     logger.info('Getting budgets...');
 
-    const allBudgets = await getAllBudgets(filters);
+    const { data, total } = await getAllBudgets(filters, pagination);
 
     res.status(200).json({
       message: 'Successfully retrieved budgets',
-      budgets: allBudgets,
-      count: allBudgets.length,
+      budgets: data,
+      count: data.length,
+      pagination: paginationMeta(pagination.page, pagination.limit, total),
     });
   } catch (error) {
     logger.error('Error fetching budgets', error);

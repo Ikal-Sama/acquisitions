@@ -18,7 +18,7 @@ describe('Users API', () => {
     });
 
     it('should return 400 for invalid id', async () => {
-      const response = await request(app)
+      await request(app)
         .get('/api/users/abc')
         .set('Cookie', 'token=valid')
         .expect(401);

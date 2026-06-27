@@ -1,4 +1,5 @@
 import logger from '#config/logger.js';
+import { parsePagination, paginationMeta } from '#utils/pagination.js';
 import {
   getAllPurchaseOrders,
   getPurchaseOrderById,
@@ -30,14 +31,22 @@ export const fetchAllPurchaseOrders = async (req, res, next) => {
     if (req.query.status) filters.status = req.query.status;
     if (req.query.vendor_id) filters.vendor_id = req.query.vendor_id;
 
+    const pagination = parsePagination(req.query);
+    const search = req.query.search || '';
+
     logger.info('Getting purchase orders...');
 
-    const allPos = await getAllPurchaseOrders(filters);
+    const { data, total } = await getAllPurchaseOrders(
+      filters,
+      pagination,
+      search
+    );
 
     res.status(200).json({
       message: 'Successfully retrieved purchase orders',
-      purchase_orders: allPos,
-      count: allPos.length,
+      purchase_orders: data,
+      count: data.length,
+      pagination: paginationMeta(pagination.page, pagination.limit, total),
     });
   } catch (error) {
     logger.error('Error fetching purchase orders', error);
