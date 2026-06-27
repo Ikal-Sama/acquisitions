@@ -1,14 +1,21 @@
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, ilike, or, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { requisitions } from '#models/requisition.model.js';
+import { escapeLike } from '#utils/format.js';
 import {
   checkBudgetAvailability,
   deductFromBudget,
 } from '#services/budgets.service.js';
 
-export const getAllRequisitions = async (filters = {}) => {
+export const getAllRequisitions = async (
+  filters = {},
+  pagination = {},
+  search = ''
+) => {
   try {
+    const { limit, offset } = pagination;
+
     const conditions = [];
 
     if (filters.status) {
@@ -23,13 +30,31 @@ export const getAllRequisitions = async (filters = {}) => {
       conditions.push(eq(requisitions.requested_by, filters.requested_by));
     }
 
+    if (search) {
+      conditions.push(
+        or(
+          ilike(requisitions.title, `%${escapeLike(search)}%`),
+          ilike(requisitions.description, `%${escapeLike(search)}%`)
+        )
+      );
+    }
+
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-    return await db
+    const [{ count: total }] = await db
+      .select({ count: sql`count(*)` })
+      .from(requisitions)
+      .where(where);
+
+    const data = await db
       .select()
       .from(requisitions)
       .where(where)
-      .orderBy(desc(requisitions.created_at));
+      .orderBy(desc(requisitions.created_at))
+      .limit(limit)
+      .offset(offset);
+
+    return { data, total: Number(total) };
   } catch (e) {
     logger.error('Error getting requisitions', e);
     throw e;

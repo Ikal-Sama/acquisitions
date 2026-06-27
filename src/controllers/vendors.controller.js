@@ -1,4 +1,5 @@
 import logger from '#config/logger.js';
+import { parsePagination, paginationMeta } from '#utils/pagination.js';
 import {
   getAllVendors,
   getVendorById,
@@ -17,12 +18,16 @@ export const fetchAllVendors = async (req, res, next) => {
   try {
     logger.info('Getting all vendors...');
 
-    const allVendors = await getAllVendors();
+    const pagination = parsePagination(req.query);
+    const search = req.query.search || '';
+
+    const { data, total } = await getAllVendors(pagination, search);
 
     res.status(200).json({
       message: 'Successfully retrieved vendors',
-      vendors: allVendors,
-      count: allVendors.length,
+      vendors: data,
+      count: data.length,
+      pagination: paginationMeta(pagination.page, pagination.limit, total),
     });
   } catch (error) {
     logger.error('Error fetching all vendors', error);

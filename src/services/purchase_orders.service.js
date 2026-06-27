@@ -1,10 +1,11 @@
-import { eq, and, desc, asc } from 'drizzle-orm';
+import { eq, and, desc, asc, ilike, or, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import {
   purchaseOrders,
   purchaseOrderItems,
 } from '#models/purchase_order.model.js';
+import { escapeLike } from '#utils/format.js';
 
 const generatePoNumber = async () => {
   const year = new Date().getFullYear();
@@ -44,8 +45,14 @@ const recalculateTotalAmount = async poId => {
   return total;
 };
 
-export const getAllPurchaseOrders = async (filters = {}) => {
+export const getAllPurchaseOrders = async (
+  filters = {},
+  pagination = {},
+  search = ''
+) => {
   try {
+    const { limit, offset } = pagination;
+
     const conditions = [];
 
     if (filters.status) {
@@ -56,13 +63,31 @@ export const getAllPurchaseOrders = async (filters = {}) => {
       conditions.push(eq(purchaseOrders.vendor_id, filters.vendor_id));
     }
 
+    if (search) {
+      conditions.push(
+        or(
+          ilike(purchaseOrders.po_number, `%${escapeLike(search)}%`),
+          ilike(purchaseOrders.notes, `%${escapeLike(search)}%`)
+        )
+      );
+    }
+
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-    return await db
+    const [{ count: total }] = await db
+      .select({ count: sql`count(*)` })
+      .from(purchaseOrders)
+      .where(where);
+
+    const data = await db
       .select()
       .from(purchaseOrders)
       .where(where)
-      .orderBy(desc(purchaseOrders.created_at));
+      .orderBy(desc(purchaseOrders.created_at))
+      .limit(limit)
+      .offset(offset);
+
+    return { data, total: Number(total) };
   } catch (e) {
     logger.error('Error getting purchase orders', e);
     throw e;

@@ -1,8 +1,9 @@
-import { eq } from 'drizzle-orm';
+import { eq, and, ilike, or, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { users } from '#models/user.model.js';
 import { hashPassword } from '#services/auth.service.js';
+import { escapeLike } from '#utils/format.js';
 
 const PUBLIC_USER_COLUMNS = {
   id: users.id,
@@ -13,9 +14,36 @@ const PUBLIC_USER_COLUMNS = {
   updated_at: users.updated_at,
 };
 
-export const getAllUsers = async () => {
+export const getAllUsers = async (pagination = {}, search = '') => {
   try {
-    return await db.select(PUBLIC_USER_COLUMNS).from(users);
+    const { limit, offset } = pagination;
+
+    const conditions = [];
+
+    if (search) {
+      conditions.push(
+        or(
+          ilike(users.name, `%${escapeLike(search)}%`),
+          ilike(users.email, `%${escapeLike(search)}%`)
+        )
+      );
+    }
+
+    const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const [{ count: total }] = await db
+      .select({ count: sql`count(*)` })
+      .from(users)
+      .where(where);
+
+    const data = await db
+      .select(PUBLIC_USER_COLUMNS)
+      .from(users)
+      .where(where)
+      .limit(limit)
+      .offset(offset);
+
+    return { data, total: Number(total) };
   } catch (e) {
     logger.error('Error getting users', e);
     throw e;

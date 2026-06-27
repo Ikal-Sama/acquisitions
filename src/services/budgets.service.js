@@ -1,10 +1,12 @@
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { budgets } from '#models/budget.model.js';
 
-export const getAllBudgets = async (filters = {}) => {
+export const getAllBudgets = async (filters = {}, pagination = {}) => {
   try {
+    const { limit, offset } = pagination;
+
     const conditions = [];
 
     if (filters.department_id) {
@@ -17,11 +19,20 @@ export const getAllBudgets = async (filters = {}) => {
 
     const where = conditions.length > 0 ? and(...conditions) : undefined;
 
-    return await db
+    const [{ count: total }] = await db
+      .select({ count: sql`count(*)` })
+      .from(budgets)
+      .where(where);
+
+    const data = await db
       .select()
       .from(budgets)
       .where(where)
-      .orderBy(desc(budgets.fiscal_year));
+      .orderBy(desc(budgets.fiscal_year))
+      .limit(limit)
+      .offset(offset);
+
+    return { data, total: Number(total) };
   } catch (e) {
     logger.error('Error getting budgets', e);
     throw e;

@@ -1,3 +1,5 @@
+export const escapeLike = s => s.replace(/[\\%_]/g, m => `\\${m}`);
+
 export const formatValidationError = errors => {
   if (!errors || !errors.issues) return 'Validation failed';
 

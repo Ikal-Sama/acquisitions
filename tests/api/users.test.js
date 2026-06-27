@@ -17,10 +17,10 @@ describe('Users API', () => {
       expect(response.body).toHaveProperty('error', 'Unauthorized');
     });
 
-    it('should return 400 for invalid id', async () => {
-      const response = await request(app)
+    it('should return 401 with invalid token', async () => {
+      await request(app)
         .get('/api/users/abc')
-        .set('Cookie', 'token=valid')
+        .set('Cookie', 'token=invalid')
         .expect(401);
     });
   });

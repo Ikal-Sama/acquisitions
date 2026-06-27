@@ -1,4 +1,5 @@
 import logger from '#config/logger.js';
+import { parsePagination, paginationMeta } from '#utils/pagination.js';
 import {
   getAllUsers,
   getUserById,
@@ -15,12 +16,16 @@ export const fetchAllUsers = async (req, res, next) => {
   try {
     logger.info('Getting users...');
 
-    const allUsers = await getAllUsers();
+    const pagination = parsePagination(req.query);
+    const search = req.query.search || '';
+
+    const { data, total } = await getAllUsers(pagination, search);
 
     res.status(200).json({
       message: 'Successfully retrieved users',
-      users: allUsers,
-      count: allUsers.length,
+      users: data,
+      count: data.length,
+      pagination: paginationMeta(pagination.page, pagination.limit, total),
     });
   } catch (error) {
     logger.error(error);
