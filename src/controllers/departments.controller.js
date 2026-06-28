@@ -19,6 +19,7 @@ import {
   updateDepartmentSchema,
 } from '#validations/departments.validation.js';
 import { formatValidationError } from '#utils/format.js';
+import { logAudit } from '#services/audit_logs.service.js';
 
 const FILTER_CONFIG = {
   code: { type: 'string', operators: ['eq'] },
@@ -107,6 +108,8 @@ export const createNewDepartment = async (req, res, next) => {
 
     const department = await createDepartment(validationResult.data);
 
+    logAudit(req, 'CREATE', 'department', department.id);
+
     res.status(201).json({
       message: 'Department created successfully',
       department,
@@ -144,6 +147,8 @@ export const updateDepartmentById = async (req, res, next) => {
 
     const department = await updateDepartment(id, updates);
 
+    logAudit(req, 'UPDATE', 'department', id, { id }, department);
+
     res.status(200).json({
       message: 'Department updated successfully',
       department,
@@ -174,6 +179,8 @@ export const deleteDepartmentById = async (req, res, next) => {
     logger.info(`Deleting department ${id}...`);
 
     const department = await deleteDepartment(id);
+
+    logAudit(req, 'DELETE', 'department', id, department);
 
     res.status(200).json({
       message: 'Department deleted successfully',

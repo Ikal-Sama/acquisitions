@@ -19,6 +19,7 @@ import {
   updateVendorSchema,
 } from '#validations/vendors.validation.js';
 import { formatValidationError } from '#utils/format.js';
+import { logAudit } from '#services/audit_logs.service.js';
 
 const FILTER_CONFIG = {
   email: { type: 'string', operators: ['eq'] },
@@ -110,6 +111,8 @@ export const createNewVendor = async (req, res, next) => {
 
     const vendor = await createVendor(validationResult.data);
 
+    logAudit(req, 'CREATE', 'vendor', vendor.id);
+
     res.status(201).json({
       message: 'Vendor created successfully',
       vendor,
@@ -147,6 +150,8 @@ export const updateVendorById = async (req, res, next) => {
 
     const vendor = await updateVendor(id, updates);
 
+    logAudit(req, 'UPDATE', 'vendor', id, { id }, vendor);
+
     res.status(200).json({
       message: 'Vendor updated successfully',
       vendor,
@@ -177,6 +182,8 @@ export const deleteVendorById = async (req, res, next) => {
     logger.info(`Deleting vendor ${id}...`);
 
     const vendor = await deleteVendor(id);
+
+    logAudit(req, 'DELETE', 'vendor', id, vendor);
 
     res.status(200).json({
       message: 'Vendor deleted successfully',

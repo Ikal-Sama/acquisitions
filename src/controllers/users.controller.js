@@ -17,6 +17,7 @@ import {
   updateUserSchema,
 } from '#validations/users.validation.js';
 import { formatValidationError } from '#utils/format.js';
+import { logAudit } from '#services/audit_logs.service.js';
 
 const FILTER_CONFIG = {
   role: { type: 'string', operators: ['eq'] },
@@ -132,6 +133,8 @@ export const updateUserById = async (req, res, next) => {
 
     const user = await updateUser(id, updates);
 
+    logAudit(req, 'UPDATE', 'user', id, { id }, user);
+
     res.status(200).json({
       message: 'User updated successfully',
       user,
@@ -162,6 +165,8 @@ export const deleteUserById = async (req, res, next) => {
     logger.info(`Deleting user ${id}...`);
 
     const user = await deleteUser(id);
+
+    logAudit(req, 'DELETE', 'user', id, user);
 
     res.status(200).json({
       message: 'User deleted successfully',

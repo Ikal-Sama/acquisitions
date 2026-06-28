@@ -20,6 +20,7 @@ import {
   updateBudgetSchema,
 } from '#validations/budgets.validation.js';
 import { formatValidationError } from '#utils/format.js';
+import { logAudit } from '#services/audit_logs.service.js';
 
 const FILTER_CONFIG = {
   fiscal_year: { type: 'integer', operators: ['eq', 'gte', 'lte', 'gt', 'lt'] },
@@ -119,6 +120,8 @@ export const createNewBudget = async (req, res, next) => {
 
     const budget = await createBudget(validationResult.data);
 
+    logAudit(req, 'CREATE', 'budget', budget.id);
+
     res.status(201).json({
       message: 'Budget created successfully',
       budget,
@@ -162,6 +165,8 @@ export const updateBudgetById = async (req, res, next) => {
     logger.info(`Updating budget ${id}...`);
 
     const budget = await updateBudget(id, updates);
+
+    logAudit(req, 'UPDATE', 'budget', id, { id }, budget);
 
     res.status(200).json({
       message: 'Budget updated successfully',
@@ -231,6 +236,8 @@ export const deleteBudgetById = async (req, res, next) => {
     logger.info(`Deleting budget ${id}...`);
 
     const budget = await deleteBudget(id);
+
+    logAudit(req, 'DELETE', 'budget', id, budget);
 
     res.status(200).json({
       message: 'Budget deleted successfully',

@@ -22,6 +22,7 @@ import {
   assignAssetSchema,
 } from '#validations/assets.validation.js';
 import { formatValidationError } from '#utils/format.js';
+import { logAudit } from '#services/audit_logs.service.js';
 
 const FILTER_CONFIG = {
   status: { type: 'string', operators: ['eq'] },
@@ -124,6 +125,8 @@ export const createNewAsset = async (req, res, next) => {
 
     const asset = await createAsset(validationResult.data);
 
+    logAudit(req, 'CREATE', 'asset', asset.id);
+
     res.status(201).json({
       message: 'Asset created successfully',
       asset,
@@ -160,6 +163,8 @@ export const updateAssetById = async (req, res, next) => {
     logger.info(`Updating asset ${id}...`);
 
     const asset = await updateAsset(id, updates);
+
+    logAudit(req, 'UPDATE', 'asset', id, { id }, asset);
 
     res.status(200).json({
       message: 'Asset updated successfully',
@@ -202,6 +207,8 @@ export const assignAssetById = async (req, res, next) => {
 
     const asset = await assignAsset(id, assigned_to);
 
+    logAudit(req, 'ASSIGN', 'asset', id);
+
     res.status(200).json({
       message: 'Asset assigned successfully',
       asset,
@@ -237,6 +244,8 @@ export const unassignAssetById = async (req, res, next) => {
 
     const asset = await unassignAsset(id);
 
+    logAudit(req, 'UNASSIGN', 'asset', id);
+
     res.status(200).json({
       message: 'Asset unassigned successfully',
       asset,
@@ -267,6 +276,8 @@ export const deleteAssetById = async (req, res, next) => {
     logger.info(`Deleting asset ${id}...`);
 
     const asset = await deleteAsset(id);
+
+    logAudit(req, 'DELETE', 'asset', id, asset);
 
     res.status(200).json({
       message: 'Asset deleted successfully',
