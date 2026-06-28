@@ -4,20 +4,22 @@ import logger from '#config/logger.js';
 import { auditLogs } from '#models/audit_log.model.js';
 
 const applyFilters = (model, filters) =>
-  filters.map(f => {
-    switch (f.operator) {
-      case 'eq':
-        return eq(model[f.field], f.value);
-      case 'gte':
-        return gte(model[f.field], f.value);
-      case 'lte':
-        return lte(model[f.field], f.value);
-      case 'gt':
-        return gt(model[f.field], f.value);
-      case 'lt':
-        return lt(model[f.field], f.value);
-    }
-  });
+  filters
+    .map(f => {
+      switch (f.operator) {
+        case 'eq':
+          return eq(model[f.field], f.value);
+        case 'gte':
+          return gte(model[f.field], f.value);
+        case 'lte':
+          return lte(model[f.field], f.value);
+        case 'gt':
+          return gt(model[f.field], f.value);
+        case 'lt':
+          return lt(model[f.field], f.value);
+      }
+    })
+    .filter(Boolean);
 
 export const log = async data => {
   try {
