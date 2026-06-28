@@ -29,7 +29,7 @@ export const signup = async (req, res, next) => {
 
     cookies.set(res, 'token', token);
 
-    logAudit(user.id, 'REGISTER', 'user', user.id, { email }).catch(() => {});
+    await logAudit(req, 'CREATE', 'user', user.id);
 
     logger.info(`User registered successfully: ${email}`);
     res.status(201).json({
@@ -75,6 +75,8 @@ export const signIn = async (req, res, next) => {
 
     cookies.set(res, 'token', token);
 
+    await logAudit(req, 'SIGN_IN', 'user', user.id);
+
     logger.info(`User logged in: ${email}`);
     res.status(200).json({
       message: 'User signed in',
@@ -99,6 +101,8 @@ export const signIn = async (req, res, next) => {
 export const signOut = async (req, res, next) => {
   try {
     cookies.clear(res, 'token');
+
+    await logAudit(req, 'SIGN_OUT', 'user', req.user?.id);
 
     logger.info('User signed out');
     res.status(200).json({ message: 'User signed out' });

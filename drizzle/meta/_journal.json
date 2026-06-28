@@ -47,8 +47,15 @@
     {
       "idx": 6,
       "version": "7",
-      "when": 1782558342310,
-      "tag": "0006_rainy_ravenous",
+      "when": 1782613883437,
+      "tag": "0006_ambitious_shaman",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1782615492453,
+      "tag": "0007_curly_starhawk",
       "breakpoints": true
     }
   ]

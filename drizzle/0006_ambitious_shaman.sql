@@ -1,10 +1,13 @@
 CREATE TABLE "audit_logs" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"user_id" integer NOT NULL,
+	"user_id" integer,
 	"action" varchar(50) NOT NULL,
-	"resource" varchar(50) NOT NULL,
-	"resource_id" integer,
-	"details" text,
+	"entity_type" varchar(50) NOT NULL,
+	"entity_id" integer,
+	"old_values" jsonb,
+	"new_values" jsonb,
+	"ip_address" varchar(45),
+	"user_agent" varchar(500),
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint

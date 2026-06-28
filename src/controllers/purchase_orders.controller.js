@@ -132,10 +132,7 @@ export const createNewPurchaseOrder = async (req, res, next) => {
 
     const po = await createPurchaseOrder(validationResult.data, req.user.id);
 
-    logAudit(req.user.id, 'CREATE', 'purchase_order', po.id, {
-      po_number: po.po_number,
-      total_amount: po.total_amount,
-    }).catch(() => {});
+    await logAudit(req, 'CREATE', 'purchase_order', po.id);
 
     res.status(201).json({
       message: 'Purchase order created successfully',
@@ -174,6 +171,8 @@ export const updatePurchaseOrderById = async (req, res, next) => {
 
     const po = await updatePurchaseOrder(id, updates);
 
+    await logAudit(req, 'UPDATE', 'purchase_order', id, { id }, po);
+
     res.status(200).json({
       message: 'Purchase order updated successfully',
       purchase_order: po,
@@ -209,9 +208,7 @@ export const sendPurchaseOrderById = async (req, res, next) => {
 
     const po = await sendPurchaseOrder(id);
 
-    logAudit(req.user.id, 'SEND', 'purchase_order', id, {
-      po_number: po.po_number,
-    }).catch(() => {});
+    await logAudit(req, 'SEND', 'purchase_order', id);
 
     res.status(200).json({
       message: 'Purchase order sent to vendor',
@@ -248,9 +245,7 @@ export const receivePurchaseOrderById = async (req, res, next) => {
 
     const po = await receivePurchaseOrder(id);
 
-    logAudit(req.user.id, 'RECEIVE', 'purchase_order', id, {
-      po_number: po.po_number,
-    }).catch(() => {});
+    await logAudit(req, 'RECEIVE', 'purchase_order', id);
 
     res.status(200).json({
       message: 'Purchase order marked as received',
@@ -291,9 +286,7 @@ export const cancelPurchaseOrderById = async (req, res, next) => {
 
     const po = await cancelPurchaseOrder(id);
 
-    logAudit(req.user.id, 'CANCEL', 'purchase_order', id, {
-      po_number: po.po_number,
-    }).catch(() => {});
+    await logAudit(req, 'CANCEL', 'purchase_order', id);
 
     res.status(200).json({
       message: 'Purchase order cancelled',
@@ -333,9 +326,7 @@ export const deletePurchaseOrderById = async (req, res, next) => {
 
     const po = await deletePurchaseOrder(id);
 
-    logAudit(req.user.id, 'DELETE', 'purchase_order', id, {
-      po_number: po.po_number,
-    }).catch(() => {});
+    await logAudit(req, 'DELETE', 'purchase_order', id, po);
 
     res.status(200).json({
       message: 'Purchase order deleted successfully',
@@ -409,6 +400,8 @@ export const addPoItem = async (req, res, next) => {
 
     const item = await createPoItem(id, bodyValidation.data);
 
+    await logAudit(req, 'CREATE', 'purchase_order_item', item.id);
+
     res.status(201).json({
       message: 'Item added to purchase order',
       item,
@@ -453,6 +446,15 @@ export const updatePoItemById = async (req, res, next) => {
 
     const item = await updatePoItem(id, itemId, bodyValidation.data);
 
+    await logAudit(
+      req,
+      'UPDATE',
+      'purchase_order_item',
+      itemId,
+      { id: itemId, purchase_order_id: id },
+      item
+    );
+
     res.status(200).json({
       message: 'Item updated successfully',
       item,
@@ -491,6 +493,8 @@ export const deletePoItemById = async (req, res, next) => {
     logger.info(`Deleting item ${itemId} from purchase order ${id}...`);
 
     const item = await deletePoItem(id, itemId);
+
+    await logAudit(req, 'DELETE', 'purchase_order_item', itemId, item);
 
     res.status(200).json({
       message: 'Item removed from purchase order',

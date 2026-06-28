@@ -125,10 +125,7 @@ export const createNewAsset = async (req, res, next) => {
 
     const asset = await createAsset(validationResult.data);
 
-    logAudit(req.user.id, 'CREATE', 'asset', asset.id, {
-      name: asset.name,
-      asset_tag: asset.asset_tag,
-    }).catch(() => {});
+    await logAudit(req, 'CREATE', 'asset', asset.id);
 
     res.status(201).json({
       message: 'Asset created successfully',
@@ -166,6 +163,8 @@ export const updateAssetById = async (req, res, next) => {
     logger.info(`Updating asset ${id}...`);
 
     const asset = await updateAsset(id, updates);
+
+    await logAudit(req, 'UPDATE', 'asset', id, { id }, asset);
 
     res.status(200).json({
       message: 'Asset updated successfully',
@@ -208,10 +207,7 @@ export const assignAssetById = async (req, res, next) => {
 
     const asset = await assignAsset(id, assigned_to);
 
-    logAudit(req.user.id, 'ASSIGN', 'asset', id, {
-      assigned_to,
-      name: asset.name,
-    }).catch(() => {});
+    await logAudit(req, 'ASSIGN', 'asset', id);
 
     res.status(200).json({
       message: 'Asset assigned successfully',
@@ -248,9 +244,7 @@ export const unassignAssetById = async (req, res, next) => {
 
     const asset = await unassignAsset(id);
 
-    logAudit(req.user.id, 'UNASSIGN', 'asset', id, {
-      name: asset.name,
-    }).catch(() => {});
+    await logAudit(req, 'UNASSIGN', 'asset', id);
 
     res.status(200).json({
       message: 'Asset unassigned successfully',
@@ -283,10 +277,7 @@ export const deleteAssetById = async (req, res, next) => {
 
     const asset = await deleteAsset(id);
 
-    logAudit(req.user.id, 'DELETE', 'asset', id, {
-      name: asset.name,
-      asset_tag: asset.asset_tag,
-    }).catch(() => {});
+    await logAudit(req, 'DELETE', 'asset', id, asset);
 
     res.status(200).json({
       message: 'Asset deleted successfully',

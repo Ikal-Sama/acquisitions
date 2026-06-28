@@ -1,6 +1,6 @@
 {
-  "id": "edae41e8-d94c-4f7c-bb31-e5a4c02dbd40",
-  "prevId": "cc8f7714-f09b-4f16-95da-b56ef9cdbc35",
+  "id": "cf81470c-9210-4954-b4bd-6cf751a8ca67",
+  "prevId": "edae41e8-d94c-4f7c-bb31-e5a4c02dbd40",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -187,7 +187,7 @@
         },
         "user_agent": {
           "name": "user_agent",
-          "type": "varchar(500)",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -211,7 +211,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
