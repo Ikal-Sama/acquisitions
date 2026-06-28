@@ -3,20 +3,49 @@ import { db } from '#config/database.js';
 import logger from '#config/logger.js';
 import { auditLogs } from '#models/audit_log.model.js';
 
+class AuditLogNotFoundError extends Error {
+  constructor(id) {
+    super(`Audit log not found: ${id}`);
+    this.name = 'AuditLogNotFoundError';
+  }
+}
+
+const AUDIT_LOG_FIELDS = new Set([
+  'id',
+  'user_id',
+  'action',
+  'entity_type',
+  'entity_id',
+  'ip_address',
+  'user_agent',
+  'created_at',
+]);
+
+const resolveColumn = (model, field) => {
+  if (!AUDIT_LOG_FIELDS.has(field) || !model[field]) {
+    throw new Error(`Unsupported audit log field: ${field}`);
+  }
+  return model[field];
+};
+
 const applyFilters = (model, filters) =>
   filters
     .map(f => {
+      const column = resolveColumn(model, f.field);
+
       switch (f.operator) {
         case 'eq':
-          return eq(model[f.field], f.value);
+          return eq(column, f.value);
         case 'gte':
-          return gte(model[f.field], f.value);
+          return gte(column, f.value);
         case 'lte':
-          return lte(model[f.field], f.value);
+          return lte(column, f.value);
         case 'gt':
-          return gt(model[f.field], f.value);
+          return gt(column, f.value);
         case 'lt':
-          return lt(model[f.field], f.value);
+          return lt(column, f.value);
+        default:
+          throw new Error(`Unsupported filter operator: ${f.operator}`);
       }
     })
     .filter(Boolean);
@@ -87,7 +116,7 @@ export const getAuditLogById = async id => {
       .where(eq(auditLogs.id, id))
       .limit(1);
 
-    if (!entry) throw new Error('Audit log not found');
+    if (!entry) throw new AuditLogNotFoundError(id);
 
     return entry;
   } catch (e) {
@@ -96,7 +125,7 @@ export const getAuditLogById = async id => {
   }
 };
 
-export const logAudit = (
+export const logAudit = async (
   req,
   action,
   entityType,
@@ -104,15 +133,15 @@ export const logAudit = (
   oldValues,
   newValues
 ) => {
-  log({
-    user_id: req.user?.id || null,
+  return log({
+    user_id: req.user?.id ?? null,
     action,
     entity_type: entityType,
     entity_id: entityId,
-    old_values: oldValues || null,
-    new_values: newValues || null,
+    old_values: oldValues ?? null,
+    new_values: newValues ?? null,
     ip_address: req.ip,
-    user_agent: req.get('User-Agent') || null,
+    user_agent: req.get('User-Agent') ?? null,
   });
 };
 
@@ -123,7 +152,7 @@ export const deleteAuditLog = async id => {
       .where(eq(auditLogs.id, id))
       .returning();
 
-    if (!deleted) throw new Error('Audit log not found');
+    if (!deleted) throw new AuditLogNotFoundError(id);
 
     logger.info(`Audit log (ID: ${id}) deleted`);
 

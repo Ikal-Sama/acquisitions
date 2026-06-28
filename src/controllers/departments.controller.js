@@ -108,7 +108,7 @@ export const createNewDepartment = async (req, res, next) => {
 
     const department = await createDepartment(validationResult.data);
 
-    logAudit(req, 'CREATE', 'department', department.id);
+    await logAudit(req, 'CREATE', 'department', department.id);
 
     res.status(201).json({
       message: 'Department created successfully',
@@ -147,7 +147,7 @@ export const updateDepartmentById = async (req, res, next) => {
 
     const department = await updateDepartment(id, updates);
 
-    logAudit(req, 'UPDATE', 'department', id, { id }, department);
+    await logAudit(req, 'UPDATE', 'department', id, { id }, department);
 
     res.status(200).json({
       message: 'Department updated successfully',
@@ -180,7 +180,7 @@ export const deleteDepartmentById = async (req, res, next) => {
 
     const department = await deleteDepartment(id);
 
-    logAudit(req, 'DELETE', 'department', id, department);
+    await logAudit(req, 'DELETE', 'department', id, department);
 
     res.status(200).json({
       message: 'Department deleted successfully',

@@ -133,7 +133,7 @@ export const updateUserById = async (req, res, next) => {
 
     const user = await updateUser(id, updates);
 
-    logAudit(req, 'UPDATE', 'user', id, { id }, user);
+    await logAudit(req, 'UPDATE', 'user', id, { id }, user);
 
     res.status(200).json({
       message: 'User updated successfully',
@@ -166,7 +166,7 @@ export const deleteUserById = async (req, res, next) => {
 
     const user = await deleteUser(id);
 
-    logAudit(req, 'DELETE', 'user', id, user);
+    await logAudit(req, 'DELETE', 'user', id, user);
 
     res.status(200).json({
       message: 'User deleted successfully',

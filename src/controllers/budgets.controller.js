@@ -120,7 +120,7 @@ export const createNewBudget = async (req, res, next) => {
 
     const budget = await createBudget(validationResult.data);
 
-    logAudit(req, 'CREATE', 'budget', budget.id);
+    await logAudit(req, 'CREATE', 'budget', budget.id);
 
     res.status(201).json({
       message: 'Budget created successfully',
@@ -166,7 +166,7 @@ export const updateBudgetById = async (req, res, next) => {
 
     const budget = await updateBudget(id, updates);
 
-    logAudit(req, 'UPDATE', 'budget', id, { id }, budget);
+    await logAudit(req, 'UPDATE', 'budget', id, { id }, budget);
 
     res.status(200).json({
       message: 'Budget updated successfully',
@@ -237,7 +237,7 @@ export const deleteBudgetById = async (req, res, next) => {
 
     const budget = await deleteBudget(id);
 
-    logAudit(req, 'DELETE', 'budget', id, budget);
+    await logAudit(req, 'DELETE', 'budget', id, budget);
 
     res.status(200).json({
       message: 'Budget deleted successfully',

@@ -111,7 +111,7 @@ export const createNewVendor = async (req, res, next) => {
 
     const vendor = await createVendor(validationResult.data);
 
-    logAudit(req, 'CREATE', 'vendor', vendor.id);
+    await logAudit(req, 'CREATE', 'vendor', vendor.id);
 
     res.status(201).json({
       message: 'Vendor created successfully',
@@ -150,7 +150,7 @@ export const updateVendorById = async (req, res, next) => {
 
     const vendor = await updateVendor(id, updates);
 
-    logAudit(req, 'UPDATE', 'vendor', id, { id }, vendor);
+    await logAudit(req, 'UPDATE', 'vendor', id, { id }, vendor);
 
     res.status(200).json({
       message: 'Vendor updated successfully',
@@ -183,7 +183,7 @@ export const deleteVendorById = async (req, res, next) => {
 
     const vendor = await deleteVendor(id);
 
-    logAudit(req, 'DELETE', 'vendor', id, vendor);
+    await logAudit(req, 'DELETE', 'vendor', id, vendor);
 
     res.status(200).json({
       message: 'Vendor deleted successfully',
